@@ -7,6 +7,7 @@
   
 #### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>   
 #### 개인정보 처리방침: <https://developerahn.blogspot.com/2020/03/blog-post.html>   
+#### 데이터는 '건강보험심사평가원-공적마스크 판매정보'를 통해 가져왔습니다.(공공데이터포털) <https://www.data.go.kr/dataset/15043025/openapi.do>
 &nbsp;
 ### 사용된 오픈소스 파일 정보
 * 지도는 '네이버 지도'를 사용하였습니다. <https://www.ncloud.com/product/applicationService/maps>   
