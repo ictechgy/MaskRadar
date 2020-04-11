@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_alert_messages">
+        <item>1. 성인용 마스크만 볼 수 있으며 베타서비스입니다.</item>
+        <item>2. 실제 판매처와 5~10분의 차이가 있을 수 있습니다.</item>
+        <item>3. 일부 약국의 번호표 배부나 기타 배부방식은 반영하지 못합니다. 이점 유의 부탁드리겠습니다.</item>
+        <item>4. 데이터 출처 : 건강보험심사평가원 &amp; 정보화진흥원</item>
+        <item>5. 데이터 공개에 대한 문의는 maskdata@nia.or.kr로 부탁드립니다.</item>
+        <item>6. 일선에서 공헌해주시는 우체국, 하나로마트 종사자 분들 및 약사분들에게 감사의 말을 전해주세요. </item>
+    </string-array>
+</resources>
