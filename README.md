@@ -1,4 +1,4 @@
-# MaskRadar
+# MaskRadar - 마스크 레이더
 > 공적마스크 검색 어플리케이션입니다.   
 > Only For Android - 안드로이드 전용입니다.
 
