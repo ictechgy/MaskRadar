@@ -2,6 +2,8 @@ package com.jh.mask_radar.ui.map;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import com.jh.mask_radar.R;
 import com.jh.mask_radar.model.Store;
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraAnimation;
+import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.MapView;
 import com.naver.maps.map.NaverMap;
@@ -71,16 +74,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
     private ArrayList<Store> oldStores;
 
+    private SharedPreferences pref;
+    private LatLng lastCoord;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationSource = new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
+        //화면에 지도가 보이자마자 권한을 요청. 내 위치 버튼을 누른 경우에 인스턴스화 요청해도 될 것으로 보임.
+
+        //사용자의 마지막 위치 가져오기
+        pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        if(pref!=null && pref.contains("latitude") && pref.contains("longitude")){
+            lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)) return;
+        switch (requestCode){
+            case LOCATION_PERMISSION_REQUEST_CODE:
+                locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults);  //true 반환
+                if(grantResults[0] == PackageManager.PERMISSION_DENIED){
+                    new MaterialAlertDialogBuilder(getContext()).setTitle(R.string.location_denied_title).setMessage(R.string.location_denied_message)
+                            .setPositiveButton(R.string.confirm, ((dialog, which) -> {})).setCancelable(true).show();
+                }
+                return;     //위치 권한일 시 return 해줘야 할 것으로 보임.
+            default:
+                break;
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+
+        /*
+        기존 코드
+        if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)){
+            //내 위치 찾기 권한에 대한 요청코드(777)과 같을 경우 true 반환.
+            //즉, 사용자가 내 위치 보기를 원한 경우 반드시 FusedLocationSource의 onRequest~ 메소드로 넘겨줘야 하며 반환 값은 true 일 것이다.
+            //이 안에서 권한 획득 여부에 따른 추가 코드를 작성해야 함. 다른 권한 관련일 시 false 반환일 것이며 외부에서 처리.
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+         */
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -144,6 +179,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                         Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
                         (dialog, which) -> {})
                 .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {})
+                .setNegativeButton(R.string.main_alert_cancle, ((dialog, which) -> {
+                    //하루동안 보지 않기 구현 코드
+
+                }))
                 .setIcon(R.drawable.ic_warning_24px).show();
                 //메시지 디자인 조금 바꿔보자. 그 다음 310번째 줄 내용(마커)
         // + 네트워크 스테이터스 상황 읽어서 네트워크 없을 시 실행 안되게 해야 할듯. 네트워크 안되니 비정상 종료됨
@@ -208,6 +247,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 naverMap.moveCamera(cameraUpdate);
             }
         }   //마지막 위치로 지도를 자동 이동시키는 부분이나 현재 작동하지 않음(앱을 껐다 켰다거나 다른 화면으로 갔다가 돌아온다거나)
+
+        //마지막 맵 위치 구현 코드 -> onCreate부로 마지막 좌표값 초기화 코드 이동
+        /*
+        SharedPreferences pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        if(pref.contains("latitude") && pref.contains("longitude")){
+            LatLng lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
+            if(!naverMap.getCameraPosition().target.equals(lastCoord)){
+                CameraUpdate cameraUpdate = CameraUpdate.scrollTo(lastCoord).animate(CameraAnimation.None);
+                naverMap.moveCamera(cameraUpdate);
+            }
+        }
+         */
+        //마지막 위치값으로 지도 중심점 이동
+        if(lastCoord != null && !naverMap.getCameraPosition().target.equals(lastCoord)){
+            CameraUpdate cameraUpdate = CameraUpdate.scrollTo(lastCoord).animate(CameraAnimation.None);
+            naverMap.moveCamera(cameraUpdate);
+        }
+        //지도 위치 초기값 설정부분에다가 작성? 해당 부분에 설정해주면 좋을 것 같은데.. 저장된 위치 없으면 기본값 그대로 뜨게 하고. 있으면 바로. CameraUpdate 시킬 필요없이.
+        //-> XML로 MapView를 설정했기 때문에 초기값으로 생성할 수는 없을 것 같다. 객체로 생성시에는 생성할 때 설정해줄 수 있어보임.
+
 
         int bottomNavHeight = (sender.getNavViewHeight() == 0)? (int)getResources().getDimension(R.dimen.bottom_navigation_height): sender.getNavViewHeight();
         naverMap.setContentPadding(0, 0, 0, bottomNavHeight);     //일반적으로 BottomNavigationView는 56dp 이다.
@@ -712,6 +771,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     public void onPause() {
         super.onPause();
         mapView.onPause();
+        //사용자가 이 지도 화면을 떠날 때 위치를 기억해 두었다가 다음에 다시 돌려주기 위한 부분.
+        if(pref == null) pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        LatLng lastPosition = naverMap.getCameraPosition().target;
+        editor.putFloat("latitude", (float) lastPosition.latitude);
+        editor.putFloat("longitude", (float) lastPosition.longitude);
+        editor.apply();
     }
 
     @Override
