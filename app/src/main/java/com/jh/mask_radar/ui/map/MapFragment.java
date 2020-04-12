@@ -103,6 +103,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                             .setPositiveButton(R.string.confirm, ((dialog, which) -> {})).setCancelable(true).show();
                 }
                 naverMap.setLocationTrackingMode(LocationTrackingMode.None);    //권한이 거부됐음에도 트래킹 아이콘이 작동하는 듯한 모습 해결용
+                //그래도 버튼 주위로 빙글빙글 돌아가는건 남아있네.. 
                 return;     //위치 권한일 시 return 해줘야 할 것으로 보임.
             default:
                 break;
@@ -574,7 +575,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         //태그를 재정의 함으로서 다시 작성.
         MarkerInfo info = (MarkerInfo)overlay.getTag(); //새로 누른 마커에 대한 정보 가져오기.
-        Store store = mapViewModel.getStores().getValue().get(info.getIndex());
+        Store store;
+        try {
+            store = mapViewModel.getStores().getValue().get(info.getIndex());
+        }catch (Exception e){   //간헐적으로 ArrayList에 대한 IndexOutOfBoundsException이 뜨는 것으로 보고되었는데 왜지??
+            new MaterialAlertDialogBuilder(getContext()).setTitle(R.string.error_alert_title).setMessage(R.string.error_alert_message)
+                    .setPositiveButton(R.string.confirm, ((dialog, which) -> {})).show();   //우선은 임시방편처리를 하였는데, 확인 후 변경이 필요할 듯. + 오류 보고 기능
+            return true;    //오류 발생 시 이벤트 처리 중단. 마커 아이콘 변경 및 infoWindow 처리하지 않음.
+        }
         LatLng coord = new LatLng(store.getLat(), store.getLng());
         CameraUpdate cameraUpdate = CameraUpdate.scrollTo(coord).animate(CameraAnimation.Easing);
         //naverMap.moveCamera(cameraUpdate); //보류.  -> 누른 마커를 지도의 중앙에 띄우려 했는데 CameraIdle 작동으로 인해 지도는 옮겨지는데 맵 마커 재로딩으로 인해
