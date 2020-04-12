@@ -32,6 +32,7 @@
             app:cardElevation="5dp"
             app:cardUseCompatPadding="true"
             app:contentPadding="3dp"
+            android:layout_gravity="end"
             >
             <com.google.android.material.textview.MaterialTextView
                 android:fontFamily="@font/hanna_11yrs"

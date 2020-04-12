@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,6 +34,7 @@ import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraAnimation;
 import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.CameraUpdate;
+import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapView;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
@@ -82,6 +84,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         super.onCreate(savedInstanceState);
         locationSource = new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
         //화면에 지도가 보이자마자 권한을 요청. 내 위치 버튼을 누른 경우에 인스턴스화 요청해도 될 것으로 보임.
+        //현재 AlertDialog가 띄워져서 바로 보이지 않는 것으로 보임.
 
         //사용자의 마지막 위치 가져오기
         pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
@@ -99,6 +102,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                     new MaterialAlertDialogBuilder(getContext()).setTitle(R.string.location_denied_title).setMessage(R.string.location_denied_message)
                             .setPositiveButton(R.string.confirm, ((dialog, which) -> {})).setCancelable(true).show();
                 }
+                naverMap.setLocationTrackingMode(LocationTrackingMode.None);    //권한이 거부됐음에도 트래킹 아이콘이 작동하는 듯한 모습 해결용
                 return;     //위치 권한일 시 return 해줘야 할 것으로 보임.
             default:
                 break;
@@ -171,19 +175,50 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 .setIcon(R.drawable.ic_warning_24px).show();
 
          */
-        new MaterialAlertDialogBuilder(getContext())
-                .setTitle(R.string.main_alert_title)
-                //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
-                .setAdapter(new ArrayAdapter<>(getContext(),
-                        android.R.layout.simple_list_item_1,
-                        Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
-                        (dialog, which) -> {})
-                .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {})
-                .setNegativeButton(R.string.main_alert_cancle, ((dialog, which) -> {
-                    //하루동안 보지 않기 구현 코드
+        if(pref == null) pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        int storedDayOfMonth = pref.getInt("day_of_week", 0);
+        boolean isDayChanged = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) != storedDayOfMonth;
+        //날짜는 Sunday를 1로 시작하여 Saturday를 7로 끝난다.
+        //최초 로딩시에는 defValue인 0을 반환하여 무조건 Alert가 뜬다.
 
-                }))
-                .setIcon(R.drawable.ic_warning_24px).show();
+        if(isDayChanged){   //날짜가 바뀐 경우에 Alert 띄우기
+
+            AlertDialog mainAlertDialog = new MaterialAlertDialogBuilder(getContext())
+                    .setTitle(R.string.main_alert_title)
+                    //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
+                    .setAdapter(new ArrayAdapter<>(getContext(),
+                            android.R.layout.simple_list_item_1,
+                            Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
+                            (dialog, which) -> {})
+                    .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {
+                        if(storedDayOfMonth != 0) {
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.remove("day_of_week");
+                            editor.apply();
+                        }
+                    })
+                    .setNegativeButton(R.string.main_alert_cancle, ((dialog, which) -> {
+                        //하루동안 보지 않기 구현 코드
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.
+                        editor.apply();
+                    }))
+                    .setIcon(R.drawable.ic_warning_24px).create();
+
+            mainAlertDialog.setOnShowListener(dialog -> {
+                        mainAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorFew, null));
+                        mainAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondary, null));
+                    });
+            mainAlertDialog.show();
+        }
+        //하루동안 보지 않기 코드에 대하여.
+        //최초 로딩시에는 storedDayOfMonth 값이 0이 뜨므로 무조건 Alert는 띄워질 것이다. 이후 사용자가 오늘 하루 보지않기를 누르면 오늘 날짜를 저장한다.
+        //이후에는 날짜가 바뀌었는지 확인하여 Alert를 띄운다.
+        //사용자가 오늘 하루 보지않기를 일요일에 했는데 그 이후에 계속 확인만을 누른다면 다시 돌아오는 일요일에 Alert가 안띄워질 것이다.
+        //따라서 날짜가 바뀐 경우 확인을 누르면 값을 0으로 되돌려 놓는다. 사용자가 오늘 하루 다시보지 않기를 누르지 않는 이상 기본적으로 다시 언제나 Alert가 띄워지도록.
+        //사용자 유형 : 계속 확인만 누르는 사용자, 날짜가 바뀔 때마다 오늘 보지 않기를 누르는 사용자, 오늘 보지 않기를 눌렀다가 확인만 누르는 사용자
+
+
                 //메시지 디자인 조금 바꿔보자. 그 다음 310번째 줄 내용(마커)
         // + 네트워크 스테이터스 상황 읽어서 네트워크 없을 시 실행 안되게 해야 할듯. 네트워크 안되니 비정상 종료됨
         // + 권한관련 설명내용 필요할 듯. 등.
