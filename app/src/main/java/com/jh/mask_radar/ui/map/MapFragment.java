@@ -311,9 +311,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //-> XML로 MapView를 설정했기 때문에 초기값으로 생성할 수는 없을 것 같다. 객체로 생성시에는 생성할 때 설정해줄 수 있어보임.
 
 
+        /*
         int bottomNavHeight = (sender.getNavViewHeight() == 0)? (int)getResources().getDimension(R.dimen.bottom_navigation_height): sender.getNavViewHeight();
         naverMap.setContentPadding(0, 0, 0, bottomNavHeight);     //일반적으로 BottomNavigationView는 56dp 이다.
         //BottomNav로 인해 지도가 잘리는 현상때문에 padding 설정.
+        -> BottomView를 안쓰므로 삭제.
+         */
         naverMap.setIndoorEnabled(true);    //실내 지도 지원
         UiSettings settings = naverMap.getUiSettings();
         settings.setCompassEnabled(true);       //나침반
