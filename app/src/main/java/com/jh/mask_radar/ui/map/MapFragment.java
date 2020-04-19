@@ -92,6 +92,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
         }
     }
+    //현재 내 위치 버튼을 누른 경우 '데이터와 GPS 켜져있고 관련 권한 허용상태'인데도 비정상 종료가 발생하는 경우 있음
+    //네트워크 및 GPS ON/OFF, 허용 여부에 따른 LocationTrackingMode 활성화 상태 변경 및 기타 상황에 대한 제어 처리 필요할 것 같음. 네트워크가 꺼져있으면 앱이 시작되지 않게 한다던지 등.
+    //즐겨찾기 (+ 추후 알람기능) 기능 작동을 InfoWindow 클릭으로 할지, 다른 방식으로 추가할 수 있게 할지.. (마커 onLongClick은 없음)
+    //InfoWindow를 나중에는 다른 알림팝업으로도 구현 가능(그렇게 하면 해당 마커 클릭 시 해당 좌표를 중심점으로 이동시키는 기능을 추가해도 infoWindow가 닫히지 않아 좋음)
+    //또 해당 알림팝업에서 즐겨찾기나 알람 추가 버튼을 추가적으로 구현하기 쉬울 것임..(네이버 지도 구현방식처럼)
+    // -> BottomSheet가 있으나 이걸 쓸 경우 BottomNavigation과의 위치를 또 고려해야함.. 흠.. 그냥 Dialog처럼 띄워야 하나.
+    //지역 검색기능
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -103,7 +110,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                             .setPositiveButton(R.string.confirm, ((dialog, which) -> {})).setCancelable(true).show();
                 }
                 naverMap.setLocationTrackingMode(LocationTrackingMode.None);    //권한이 거부됐음에도 트래킹 아이콘이 작동하는 듯한 모습 해결용
-                //그래도 버튼 주위로 빙글빙글 돌아가는건 남아있네.. 
+                //그래도 버튼 주위로 빙글빙글 돌아가는건 남아있네..
                 return;     //위치 권한일 시 return 해줘야 할 것으로 보임.
             default:
                 break;
@@ -630,11 +637,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             //oldMarker를 이용한 처리로 이 if종속문은 없어도 됨.
         }else{
             infoWindow.open(marker);        //해당 마커에 대해 정보창 띄우기.
+
+            /*
+            //infoWindow가 지도 바깥쪽에 생길 때 잘리는 현상 발생. 따라서 infoWindow에 offset을 두어 온전하게 보이게 하려고 함.
+            int[] outLocation = new int[2];
+            mapView.getLocationOnScreen(outLocation);   //mapView의 화면상 시작점 절대좌표 얻기
+
+            float centerX = (outLocation[0] + mapView.getMeasuredWidth())/2.0f; //중심 x좌표 얻기 - mapView.getMeasuredWidth()는 naverMap.getWidth()로 대체 가능
+            float centerY = (outLocation[1] + mapView.getMeasuredHeight())/2.0f;//중심 y좌표 얻기 - mapView.getMeasuredHeight()는 naverMap.getHeight()로 대체 가능
+
+            PointF markerScreenLoc = projection.toScreenLocation(coord);    //마커의 좌표를 스크린 상 좌표로 변환.
+            //adapter.getView를 이용해 View객체를 얻을 수도 있지만 굳이 그러지는 않음.
+            int infoWidth = adapter.getViewWidth();
+            int infoHeight = adapter.getViewHeight();       //infoWindow View의 크기 가져옴.
+
+            PointF defaultAnchorPoint = infoWindow.getAnchor(); //기본 앵커 위치값 얻어오기(가운데 아래)
+            if(markerScreenLoc.x < centerX){    //마커가 X좌표 기준 스크린 중심 왼쪽에 있는 경우
+                int offsetX =  (int)markerScreenLoc.x - infoWidth/2;    //마커의 x좌표에서 infoWindow의 절반만큼을 빼본다.
+                if(offsetX < 0){    //offsetX가 0보다 작다는 것은 화면 왼쪽으로 infoWindow가 넘어간 것.
+                    infoWindow.setOffsetX(-offsetX); //오른쪽으로 밀어주어야 하므로 -1을 곱한 값 사용.
+                    defaultAnchorPoint.x += offsetX;    //앵커포인트는 그만큼 다시 왼쪽으로 밀어주어야 함.
+                }
+            }else{  //마커가 x좌표 기준 스크린 중심 오른쪽에 있는 경우.
+
+            }
+            infoWindow.setAnchor(defaultAnchorPoint);
+            -> infoWindow 위치는 이동이 되긴 하는데 말풍선의 말 꼬리부분이 계속 중앙부분이어서 적합하지 않다. Anchor가 말풍선 꼬리인줄 알았는데 아니었고..
+            Anchor나 offset설정이나 비슷한 설정이다.. 따라서 이걸 쓰려면 꼬리부분이 다른 Custom 말풍선을 써야 할 것 같다.
+            -> 그냥 이 상태에서 검색 및 즐겨찾기 기능부터 구현하거나 BottomNav를 측면 Navigation으로 바꾸고 지도의 padding을 없앤 뒤 지도를 전면에 다 띄운다.
+            이후에 마커 클릭시 뜨는 infoWindow를 BottomSheet와 같은 별도의 dialog형식으로 정의하고..아래부분이 가려질테니 검색 반경을 조금 줄여야 할지도 - 줄이거나 중심점을 살짝 위로 잡거나)
+            그 BottomSheet에서 즐겨찾기 기능을 넣는게 좋을 것 같다.. (누른 마커지점으로 지도 카메라 이동은 그 이후에 고려해볼 문제)
+            ActionBar는 없애고 햄버거 버튼만 동그라미로 남겨두거나 .. ActionBar를 남기는 경우 오른쪽 위에 검색버튼 두면 될 듯.
+            (검색버튼도 동그라미 버튼으로 FloatingActionButton으로 두어도 될 것 같다. 그래서 지도를 전면 다 차게 만들고, 왼쪽 위에 메뉴버튼, 오른쪽 위에 검색버튼만 보이게.)
+            구매 대상자 알림은 적절한 곳으로 옮기고(메뉴 버튼 누르면 navView 아래쪽에 보이게 한다던지..) NavigationView의 상단 이미지는 그래픽 이미지를 수정 이용하면 될 것 같다.
+            왼쪽 부분에 앱 아이콘 크게 놓고 오른쪽에 마스크 레이더 이름 놓고 아래에 공적마스크 ~~ 내용 작게 넣고.
+            그리고 설정 Fragment와 아이콘 및 이름은 숨겨놓고 물음표 기호와 About Fragment로 하는게 나을 것 같다. 설정 할 것이 없으므로. (한글 명으로는 앱에 대하여)
+            + 제안하기 또는 문의하기 버튼도.. 아래쪽에?
+            만약 설정할 것이 필요하여 설정화면을 만들어야 한다면 Android Studio에서 제공해주는 SettingFragment를 쓰는게 나을 듯
+            즐겨찾기 화면의 등록해둔 약국의 재고 확인(또는 알람)의 동작 방식은 그 이후에 생각하자. 공공데이터의 다른 API를 쓰거나 서버를 구축,.?
+            똑같은 API를 쓴다면.. 해당 약국 고유번호와 좌표 기억해뒀다가 재쿼리 한 후(반경은 좁게) 그 후에 고유번호 같은 데이터만 걸러서 즐겨찾기 화면에 Text값으로 출력.
+            내 주변 약국 보기 목록같은것도 있으면 좋고.... (검색반경 조절 가능하게 한다던가. 내 위치와의 거리도 표시한다던가.)
+             */
+
         }
 
         //infoWindow.setOnClickListener();      정보창 클릭 리스너.
-
-
 
         //해당 마커 지점 가게의 상세 정보 띄우기. - 단순히 store 정보 뿐만이 아니라 네이버 DB등도 이용 가능하면 좋을텐데.. 더 상세하게 띄우는거 그런 것도 될까.
         //네이버에서 제공 하면 가능 할 듯 싶은데.. 아니면 해당 약국 코드를 가지고 공공 데이터로 한번 더 fetch?
@@ -694,6 +741,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         public Store getStore(){
             return store;
+        }
+
+        int getViewWidth(){
+            return (infoView==null)? 0: infoView.getWidth();
+        }
+
+        int getViewHeight(){
+            return (infoView==null)? 0 : infoView.getHeight();
         }
 
         @NonNull
@@ -766,6 +821,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             address.setText(addr);
 
             return infoView;
+            //이 방식은 마커가 클릭될 때마다 미리 setStore로 adapter 내의 변수 값을 바꿔주는 방식을 취했다. 이 방법 말고 getContentView에 들어오는 매개변수인 infoWindow를 이용하여
+            //infoWindow.getMarker().getTag()를 이용해 클릭된 마커에 대한 정보를 가져올 수도 있다.
         }
     }
 
