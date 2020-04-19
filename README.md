@@ -4,7 +4,7 @@
 
      현재 지도부분만 구현된 상태입니다.   
      다른 부분 구현하는대로 업데이트 예정
-     -> BottomNav를 SideNavigationView로 변경 중 
+     -> BottomNav를 SideNavigationView로 변경 중 !!
   
 #### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>   
 #### 개인정보 처리방침: <https://developerahn.blogspot.com/2020/03/blog-post.html>   
