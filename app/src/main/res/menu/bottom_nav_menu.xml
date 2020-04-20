@@ -12,8 +12,8 @@
         android:title="@string/title_favorite" />
 
     <item
-        android:id="@+id/navigation_settings"
-        android:icon="@drawable/ic_settings_24px"
-        android:title="@string/title_settings" />
+        android:id="@+id/navigation_about"
+        android:icon="@drawable/ic_feedback_black_24dp"
+        android:title="@string/title_about" />
 
 </menu>

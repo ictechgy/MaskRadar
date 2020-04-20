@@ -205,7 +205,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                             editor.apply();
                         }
                     })
-                    .setNegativeButton(R.string.main_alert_cancle, ((dialog, which) -> {
+                    .setNegativeButton(R.string.main_alert_cancel, ((dialog, which) -> {
                         //하루동안 보지 않기 구현 코드
                         SharedPreferences.Editor editor = pref.edit();
                         editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.

@@ -16,4 +16,6 @@
     <dimen name="nav_header_title">25sp</dimen>
     <dimen name="nav_header_desc">17sp</dimen>
 
+    <dimen name="nav_header_email">13sp</dimen>
+
 </resources>

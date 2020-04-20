@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_map, R.id.navigation_favorite, R.id.navigation_settings)
+                R.id.navigation_map, R.id.navigation_favorite, R.id.navigation_about)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);

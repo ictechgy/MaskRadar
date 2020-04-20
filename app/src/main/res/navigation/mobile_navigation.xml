@@ -18,8 +18,8 @@
         tools:layout="@layout/fragment_favorite" />
 
     <fragment
-        android:id="@+id/navigation_settings"
-        android:name="com.jh.mask_radar.ui.settings.SettingsFragment"
-        android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:id="@+id/navigation_about"
+        android:name="com.jh.mask_radar.ui.about.AboutFragment"
+        android:label="@string/title_about"
+        tools:layout="@layout/fragment_about" />
 </navigation>

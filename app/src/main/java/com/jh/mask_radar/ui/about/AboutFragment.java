@@ -1,4 +1,4 @@
-package com.jh.mask_radar.ui.settings;
+package com.jh.mask_radar.ui.about;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,22 +14,25 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.jh.mask_radar.R;
 
-public class SettingsFragment extends Fragment {
+public class AboutFragment extends Fragment {
 
-    private SettingsViewModel settingsViewModel;
+    private AboutViewModel aboutViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        settingsViewModel =
-                ViewModelProviders.of(this).get(SettingsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_settings, container, false);
+        aboutViewModel =
+                ViewModelProviders.of(this).get(AboutViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_about, container, false);
         final TextView textView = root.findViewById(R.id.text_notifications);
-        settingsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        aboutViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
             }
         });
+
         return root;
     }
+
+
 }
