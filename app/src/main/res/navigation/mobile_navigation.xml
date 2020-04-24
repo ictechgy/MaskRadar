@@ -21,5 +21,18 @@
         android:id="@+id/navigation_about"
         android:name="com.jh.mask_radar.ui.about.AboutFragment"
         android:label="@string/title_about"
-        tools:layout="@layout/fragment_about" />
+        tools:layout="@layout/fragment_about" >
+        <action
+            android:id="@+id/action_navigation_about_to_licenseFragment"
+            app:destination="@id/licenseFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/licenseFragment"
+        android:name="com.jh.mask_radar.ui.about.LicenseFragment"
+        android:label="fragment_license"
+        tools:layout="@layout/fragment_license" >
+        <action
+            android:id="@+id/action_licenseFragment_to_navigation_about"
+            app:destination="@id/navigation_about" />
+    </fragment>
 </navigation>

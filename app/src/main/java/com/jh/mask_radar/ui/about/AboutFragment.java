@@ -11,7 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
+import com.google.android.material.button.MaterialButton;
 import com.jh.mask_radar.R;
 
 public class AboutFragment extends Fragment {
@@ -29,6 +32,12 @@ public class AboutFragment extends Fragment {
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
             }
+        });
+
+        MaterialButton goToLicense = root.findViewById(R.id.button_go_to_license);
+        goToLicense.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+            navController.navigate(R.id.action_navigation_about_to_licenseFragment);
         });
 
         return root;

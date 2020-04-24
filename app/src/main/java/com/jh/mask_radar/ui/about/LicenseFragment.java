@@ -10,11 +10,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.jh.mask_radar.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class LicenseFragment extends Fragment {
     RecyclerView recyclerView;
@@ -46,10 +48,19 @@ public class LicenseFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         ArrayList<LicenseAdapter.License> list = new ArrayList<>();
-
+        //라이센스 정보 객체 생성 후 list에 add
+        //Hard Coded
+        list.add(new LicenseAdapter.License(getString(R.string.license_naver_map_title), getString(R.string.license_naver_map_content)));
+        list.add(new LicenseAdapter.License(getString(R.string.license_material_title), getString(R.string.license_material_content)));
+        list.add(new LicenseAdapter.License(getString(R.string.license_woowa_title), getString(R.string.license_woowa_content)));
+        list.add(new LicenseAdapter.License(getString(R.string.license_naver_font_title), getString(R.string.license_naver_font_content)));
+        list.add(new LicenseAdapter.License(getString(R.string.license_nh_ci_title), getString(R.string.license_nh_ci_content)));
+        list.add(new LicenseAdapter.License(getString(R.string.license_post_ci_title), getString(R.string.license_post_ci_content)));
+        //can be changed to ArrayAdapter<>()?
 
         LicenseAdapter adapter = new LicenseAdapter();
-
+        adapter.licenses = list;
+        recyclerView.setAdapter(adapter);
 
         return root;
     }
