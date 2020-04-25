@@ -154,7 +154,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //sunday=1, mon=2 .3.4.5.6. sat = 7 -> 보급패턴은 1,6 2,7 3,8 4,9 5,0
         String targetText;
         if(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY){
-            targetText = "주중 미 구입자 구매 가능";
+            targetText = " 주중 미 구입자 구매 가능";
         }else{
             targetText = "출생연도 끝자리 "+(dayOfWeek-1)+", "+((dayOfWeek+4)%10);
         }       //이거에다가 뭐 각종 알림도 띄워줘야 하고.. 마커에 대한것도 더 해야하고(기존 마커 그릴지 그대로 둘지, GPS까지.)

@@ -64,6 +64,7 @@
         android:textColor="@color/colorNoSale"
         android:fontFamily="@font/jua"
         android:textAlignment="center"
+        android:autoLink="email"
         />
     </LinearLayout>
 </LinearLayout>

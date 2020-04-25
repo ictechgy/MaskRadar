@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
 
         //navView.setOnNavigationItemReselectedListener(this);
 
-        //navigationView에 대한 reselect 처리 필요
+        //navigationView에 대한 reselect 처리 필요!!!! <- 최우선 과제 
     }
 
     @Override

@@ -36,7 +36,7 @@ public class AboutFragment extends Fragment {
 
         MaterialButton goToLicense = root.findViewById(R.id.button_go_to_license);
         goToLicense.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             navController.navigate(R.id.action_navigation_about_to_licenseFragment);
         });
 

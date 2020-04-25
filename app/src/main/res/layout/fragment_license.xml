@@ -14,19 +14,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:id="@+id/top_layout"
         >
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/license_header"
-            android:textSize="30sp"
-            android:fontFamily="@font/nanum_square"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:textColor="@color/colorSecondary"
-            />
         <com.google.android.material.textview.MaterialTextView
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
@@ -38,17 +28,6 @@
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
             />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/bottom_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_layout">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/license_recycler_view"

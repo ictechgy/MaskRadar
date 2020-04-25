@@ -18,7 +18,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autoLink="email"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_go_to_license"
@@ -34,6 +35,10 @@
         app:icon="@drawable/ic_keyboard_arrow_right_black_24dp"
         app:iconGravity="end"
         app:iconTint="@color/colorPrimary"
+        android:fontFamily="@font/jua"
+        android:textAlignment="center"
+        android:paddingStart="40dp"
+        android:paddingEnd="10dp"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

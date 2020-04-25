@@ -29,7 +29,7 @@
     <fragment
         android:id="@+id/licenseFragment"
         android:name="com.jh.mask_radar.ui.about.LicenseFragment"
-        android:label="fragment_license"
+        android:label="@string/license_header"
         tools:layout="@layout/fragment_license" >
         <action
             android:id="@+id/action_licenseFragment_to_navigation_about"
