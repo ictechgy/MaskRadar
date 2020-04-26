@@ -1,6 +1,7 @@
 package com.jh.mask_radar;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,10 +21,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity implements NavViewHeightReturnSender, BottomNavigationView.OnNavigationItemReselectedListener {
 
     private int navViewHeight;
     private AppBarConfiguration mAppBarConfiguration;
+    private NavigationView navigationView;
+    private int previousMenuId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
         setContentView(R.layout.activity_main);
         //BottomNavigationView navView = findViewById(R.id.nav_view);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -54,8 +59,24 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
 
         //navView.setOnNavigationItemReselectedListener(this);
 
-        //navigationView에 대한 reselect 처리 필요!!!! <- 최우선 과제 
+        //navigationView에 대한 reselect 처리 필요!!!! <- 최우선 과제
+        }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.e("onOptionsItem", "작동");
+        previousMenuId = navigationView.getCheckedItem().getItemId();
+        navigationView.getCheckedItem().setEnabled(false);
+        return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onOptionsMenuClosed(Menu menu) {
+        navigationView.getMenu().findItem(previousMenuId).setEnabled(true);
+        super.onOptionsMenuClosed(menu);
+    }
+    //왜 작동을 안하는 것인가?!?!? 으아아ㅏㅏㅏ 
 
     @Override
     public int getNavViewHeight(){
