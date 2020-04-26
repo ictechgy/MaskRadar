@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.MainActivity;
@@ -53,7 +55,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraChangeListener, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraChangeListener, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener, Button.OnClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 777;
     private FusedLocationSource locationSource;
     private LatLng oldPosition;
@@ -705,7 +707,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         return true;    //이벤트 소비(지도로 전파 x) -> 지도로 전파시 온전히 작동하지 않는것으로 보임.
     }
 
-    private static class CustomInfoViewAdapter extends InfoWindow.DefaultViewAdapter{       //마커를 눌렀을 시 나오는 InfoWindow에 대한 CustomAdapter
+    @Override
+    public void onClick(View v) {   //InfoView 즐겨찾기 버튼 클릭 콜백 리스너
+        //Room 사용 예정.
+        //추가한 약국에 대한 정보를 DB에 저장하고.. 흠. Favorite Fragment에서 해당 약국에 대한 정보는 어떻게 가져올까.
+        //약국 고유 코드번호를 통해 get하는 API가 없기때문에 해당 좌표를 저장해놓고, 해당 좌표 기준으로 (반경은 0m?) 다시 가져온 뒤 데이터 검증(코드 일치여부 검사)
+        //후에 재고량 등 표시하는 방식
+        //해당 약국 클릭 시 지도에서 해당 위치로 이동하는 기능까지 추가.
+
+    }
+
+    private class CustomInfoViewAdapter extends InfoWindow.DefaultViewAdapter{       //마커를 눌렀을 시 나오는 InfoWindow에 대한 CustomAdapter
         private ViewGroup root;
         private Store store;
 
@@ -735,6 +747,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
             updateIcon = infoView.findViewById(R.id.update_icon);
             receiveIcon = infoView.findViewById(R.id.receive_icon);
+            MaterialButton buttonAddFavorite = infoView.findViewById(R.id.button_add_favorite);
+            buttonAddFavorite.setOnClickListener(MapFragment.this);
         }
 
 
@@ -822,6 +836,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             int idx = addr.indexOf("(");
             if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
             address.setText(addr);
+
+
 
             return infoView;
             //이 방식은 마커가 클릭될 때마다 미리 setStore로 adapter 내의 변수 값을 바꿔주는 방식을 취했다. 이 방법 말고 getContentView에 들어오는 매개변수인 infoWindow를 이용하여
