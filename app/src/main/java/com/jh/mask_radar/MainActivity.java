@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
         navigationView.getMenu().findItem(previousMenuId).setEnabled(true);
         super.onOptionsMenuClosed(menu);
     }
-    //왜 작동을 안하는 것인가?!?!? 으아아ㅏㅏㅏ 
+    //왜 작동을 안하는 것인가?!?!? 으아아ㅏㅏㅏ
 
     @Override
     public int getNavViewHeight(){
