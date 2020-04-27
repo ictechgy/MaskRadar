@@ -31,6 +31,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.MainActivity;
 import com.jh.mask_radar.R;
+import com.jh.mask_radar.db.AppDatabase;
+import com.jh.mask_radar.db.Pharm;
 import com.jh.mask_radar.model.Store;
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraAnimation;
@@ -80,6 +82,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
     private SharedPreferences pref;
     private LatLng lastCoord;
+
+    private AppDatabase db;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -449,93 +453,87 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         //정상적으로 자료를 받은 경우.
         ExecutorService executorService = Executors.newSingleThreadExecutor();  //싱글스레드 받아오기
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                markers = new ArrayList<>();        //데이터를 받아올 때마다 새로 선언해주는 것이 나을 거같다. 데이터가 많아졌다가 적어졌을 때 메모리 적게 잡기 위해.
-                for(Store store : stores){          //데이터 받아서 각각 파싱한 store객체 하나당 마커 하나를 생성해주는 반복문이다.
-                    Marker marker = new Marker();
-                    marker.setPosition(new LatLng(store.getLat(), store.getLng()));     //마커의 포지션 정보 세팅
+        executorService.execute(() -> {
+            markers = new ArrayList<>();        //데이터를 받아올 때마다 새로 선언해주는 것이 나을 거같다. 데이터가 많아졌다가 적어졌을 때 메모리 적게 잡기 위해.
+            for(Store store : stores){          //데이터 받아서 각각 파싱한 store객체 하나당 마커 하나를 생성해주는 반복문이다.
+                Marker marker = new Marker();
+                marker.setPosition(new LatLng(store.getLat(), store.getLng()));     //마커의 포지션 정보 세팅
 
-                    String type = store.getType();      //판매처 종류
-                    String remain = store.getRemain_stat();     //재고량
+                String type = store.getType();      //판매처 종류
+                String remain = store.getRemain_stat();     //재고량
 
-                    //아이콘 세팅
-                    int resId;
-                    if(type.equals("01")){   //약국
-                        resId = R.drawable.ic_unselected_pharm;
-                    }else if(type.equals("02")){     //우체국
-                        resId = R.drawable.ic_unselected_post_office;
-                    }else{      //농협
-                        resId = R.drawable.ic_unselected_nh;
-                    }
-                    marker.setIcon(OverlayImage.fromResource(resId));       //판매처 유형에 따른 아이콘 세팅
-
-
-                    //크기 설정
-                    marker.setWidth((int)getResources().getDimension(R.dimen.marker_width_unselected));
-                    marker.setHeight((int)getResources().getDimension(R.dimen.marker_height_unselected));
-
-                    //재고량에 따른 색 설정 및 zIndex(보이는 우선순위) 세팅 -> 겹쳐 보이는 경우 재고량이 많은 가게를 맨 앞에 보이도록 함.
-                    int color;
-                    int zIndex;
-                    switch (remain){
-                        case "plenty":
-                            //color = Color.GREEN;      기본 제공색의 가시성이 떨어져서 변경.
-                            color = R.color.colorPlenty;
-                            zIndex = 100;
-                            break;
-                        case "some":
-                            //color = Color.YELLOW;
-                            color = R.color.colorSome;
-                            zIndex = 80;
-                            break;
-                        case "few":
-                            //color = Color.RED;
-                            color = R.color.colorFew;
-                            zIndex = 60;
-                            break;
-                        case "empty":
-                            //color = Color.GRAY;
-                            color = R.color.colorEmpty;
-                            zIndex = 40;
-                            break;
-                        default:        //판매 중지/완료 - break
-                            //color = getResources().getColor(R.color.colorNoSale, null);       //판매중지-완료 색은 일단 보라색 계열로 설정 -> 검정
-                            color = R.color.colorNoSale;
-                            marker.setCaptionText("판매중지/완료");      //캡션 텍스트
-                            marker.setCaptionMinZoom(16);       //16줌레벨 이상 확대해야 캡션 보임
-                            zIndex = 0;      //지도에서 겹치는 경우 가장 뒤로 숨김
-                            break;
-                    }
-                    //marker.setIconTintColor(color);
-                    marker.setIconTintColor(getResources().getColor(color, null)); //아이콘의 색도 재고량에 따른 색으로 설정
-                    marker.setZIndex(zIndex);
-
-                    marker.setHideCollidedSymbols(true);    //마커와 지도상의 심볼 겹칠 시 지도 심볼 숨기기
-                    marker.setHideCollidedCaptions(true);   //캡션간 겹칠 시 숨기기
-
-                    //marker.setTag(store.getIndex());
-                    marker.setTag(new MarkerInfo(store.getIndex(), type, true));
-                    //결국 마커별로 별도의 구분 태그오브젝트 만들게 되었다.. ㅠㅠ -> 기존에는 인덱스 값만 가지도록 하였는데, 마커 클릭시 마커 모양을 변경해줘야 했다.
-                    //-> 해당 경우에 클릭한 마커의 판매처 유형을 알아야 알맞은 변형 마커로 설정해줄 수 있다. 인덱스 값으로 stores나 markers에서 해당 판매처 유형을 다시 get 할 수도 있긴 했으나..
-                    //데이터 get 편이성을 위해 위와같이 태그 설정화.
-                    marker.setOnClickListener(MapFragment.this);        //마커 클릭 시 Overlay.OnClickListener 작동.
-                    markers.add(marker);        //markers 목록에 marker 등록
+                //아이콘 세팅
+                int resId;
+                if(type.equals("01")){   //약국
+                    resId = R.drawable.ic_unselected_pharm;
+                }else if(type.equals("02")){     //우체국
+                    resId = R.drawable.ic_unselected_post_office;
+                }else{      //농협
+                    resId = R.drawable.ic_unselected_nh;
                 }
+                marker.setIcon(OverlayImage.fromResource(resId));       //판매처 유형에 따른 아이콘 세팅
 
-                //마커 목록 완성시 메인 쓰레드로 해당 내용 전달.
-                handler.post(new Runnable() {       //in main UI Thread
-                    @Override
-                    public void run() {
-                        for(Marker marker : markers){
-                            marker.setMap(naverMap);        //마커에 맵 값 설정 (맵에 마커 등록)
-                        }
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
 
+                //크기 설정
+                marker.setWidth((int)getResources().getDimension(R.dimen.marker_width_unselected));
+                marker.setHeight((int)getResources().getDimension(R.dimen.marker_height_unselected));
+
+                //재고량에 따른 색 설정 및 zIndex(보이는 우선순위) 세팅 -> 겹쳐 보이는 경우 재고량이 많은 가게를 맨 앞에 보이도록 함.
+                int color;
+                int zIndex;
+                switch (remain){
+                    case "plenty":
+                        //color = Color.GREEN;      기본 제공색의 가시성이 떨어져서 변경.
+                        color = R.color.colorPlenty;
+                        zIndex = 100;
+                        break;
+                    case "some":
+                        //color = Color.YELLOW;
+                        color = R.color.colorSome;
+                        zIndex = 80;
+                        break;
+                    case "few":
+                        //color = Color.RED;
+                        color = R.color.colorFew;
+                        zIndex = 60;
+                        break;
+                    case "empty":
+                        //color = Color.GRAY;
+                        color = R.color.colorEmpty;
+                        zIndex = 40;
+                        break;
+                    default:        //판매 중지/완료 - break
+                        //color = getResources().getColor(R.color.colorNoSale, null);       //판매중지-완료 색은 일단 보라색 계열로 설정 -> 검정
+                        color = R.color.colorNoSale;
+                        marker.setCaptionText("판매중지/완료");      //캡션 텍스트
+                        marker.setCaptionMinZoom(16);       //16줌레벨 이상 확대해야 캡션 보임
+                        zIndex = 0;      //지도에서 겹치는 경우 가장 뒤로 숨김
+                        break;
+                }
+                //marker.setIconTintColor(color);
+                marker.setIconTintColor(getResources().getColor(color, null)); //아이콘의 색도 재고량에 따른 색으로 설정
+                marker.setZIndex(zIndex);
+
+                marker.setHideCollidedSymbols(true);    //마커와 지도상의 심볼 겹칠 시 지도 심볼 숨기기
+                marker.setHideCollidedCaptions(true);   //캡션간 겹칠 시 숨기기
+
+                //marker.setTag(store.getIndex());
+                marker.setTag(new MarkerInfo(store.getIndex(), type, true));
+                //결국 마커별로 별도의 구분 태그오브젝트 만들게 되었다.. ㅠㅠ -> 기존에는 인덱스 값만 가지도록 하였는데, 마커 클릭시 마커 모양을 변경해줘야 했다.
+                //-> 해당 경우에 클릭한 마커의 판매처 유형을 알아야 알맞은 변형 마커로 설정해줄 수 있다. 인덱스 값으로 stores나 markers에서 해당 판매처 유형을 다시 get 할 수도 있긴 했으나..
+                //데이터 get 편이성을 위해 위와같이 태그 설정화.
+                marker.setOnClickListener(MapFragment.this);        //마커 클릭 시 Overlay.OnClickListener 작동.
+                markers.add(marker);        //markers 목록에 marker 등록
             }
+
+            //마커 목록 완성시 메인 쓰레드로 해당 내용 전달.
+            handler.post(() -> {                //in main UI Thread
+                for(Marker marker : markers){
+                    marker.setMap(naverMap);        //마커에 맵 값 설정 (맵에 마커 등록)
+                }
+                progressBar.setVisibility(View.GONE);
+            });
+
         });
 
     }
@@ -712,13 +710,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //Room 사용 예정.
         //추가한 약국에 대한 정보를 DB에 저장하고.. 흠. Favorite Fragment에서 해당 약국에 대한 정보는 어떻게 가져올까.
         //약국 고유 코드번호를 통해 get하는 API가 없기때문에 해당 좌표를 저장해놓고, 해당 좌표 기준으로 (반경은 0m?) 다시 가져온 뒤 데이터 검증(코드 일치여부 검사)
-        //후에 재고량 등 표시하는 방식
+        //후에 재고량 등 표시하는 방식...이 일단 최선일 것 같다.
         //해당 약국 클릭 시 지도에서 해당 위치로 이동하는 기능까지 추가.
+        db = AppDatabase.getInstance(getContext());
+        MarkerInfo info = (MarkerInfo) infoWindow.getMarker().getTag();     //현재 열려있는 인포윈도우를 통해 마커의 정보를 가져옴.
+        Store store = mapViewModel.getStores().getValue().get(info.getIndex()); //마커의 Tag에는 약국의 인덱스 값과 타입값만 있기 때문에 별도로 get
+        Pharm pharm = new Pharm();
 
+        pharm.code = store.getCode();
+        pharm.addr = store.getAddr();
+        pharm.createdAt = store.getCreated_at();
+        pharm.remainStat = store.getRemain_stat();
+        pharm.lat = store.getLat();
+        pharm.lng = store.getLng();
+        pharm.name = store.getName();
+        pharm.stockAt = store.getStock_at();
+
+        db.pharmDao().insertPharm(pharm);
+
+        db.close();
+        //테스팅 필요. + FavoriteFragment에서 불러와주는 코드 추가 필요. 
+
+        //Pharm DTO와 Store객체를 통합하면 어떨까.
     }
 
     private class CustomInfoViewAdapter extends InfoWindow.DefaultViewAdapter{       //마커를 눌렀을 시 나오는 InfoWindow에 대한 CustomAdapter
-        private ViewGroup root;
         private Store store;
 
         private MaterialTextView statusView;    //재고량 상태에 따라 변하는 색상패드
@@ -734,8 +750,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         private View infoView;
         CustomInfoViewAdapter(Context context, MapView mapView){
             super(context);
-            root = mapView;
-            infoView = LayoutInflater.from(getContext()).inflate(R.layout.info_view_custom, root, false);
+            infoView = LayoutInflater.from(getContext()).inflate(R.layout.info_view_custom, mapView, false);
             //adapter 생성시 view inflate
 
             statusView = infoView.findViewById(R.id.status_view);
@@ -752,7 +767,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         }
 
 
-        public void setStore(Store store){
+        void setStore(Store store){
             this.store = store;
         }
 

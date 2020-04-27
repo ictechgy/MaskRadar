@@ -36,15 +36,15 @@ public class MapViewModel extends ViewModel {
         stores.setValue(null);  //초기값 null 설정
     }
 
-    public LiveData<List<Store>> getStores(){
+    LiveData<List<Store>> getStores(){
         return stores;
     }
 
-    public void setRequestQueue(RequestQueue requestQueue){
+    void setRequestQueue(RequestQueue requestQueue){
         this.requestQueue = requestQueue;
     }
 
-    public void getMaskInfo(final LatLng coord, final double radius){      //마스크 정보 가져오기. 필요한 값: 지도 중심점 좌표와 반경 반지름
+    void getMaskInfo(final LatLng coord, final double radius){      //마스크 정보 가져오기. 필요한 값: 지도 중심점 좌표와 반경 반지름
         StringBuilder builder = new StringBuilder();
         builder.append(MASK_URL)
                 .append("lat=").append(coord.latitude).append("&lng=").append(coord.longitude).append("&m=").append((int) radius);  //반경값은 Int로 넘겨야 함.
