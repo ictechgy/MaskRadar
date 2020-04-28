@@ -6,7 +6,6 @@ import androidx.room.Fts4;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Fts4
 @Entity(indices = {@Index(value = {"code"}, unique = true)})
 public class Pharm {
     @PrimaryKey

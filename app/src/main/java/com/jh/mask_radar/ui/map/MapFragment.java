@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -715,18 +716,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         db = AppDatabase.getInstance(getContext());
         MarkerInfo info = (MarkerInfo) infoWindow.getMarker().getTag();     //현재 열려있는 인포윈도우를 통해 마커의 정보를 가져옴.
         Store store = mapViewModel.getStores().getValue().get(info.getIndex()); //마커의 Tag에는 약국의 인덱스 값과 타입값만 있기 때문에 별도로 get
-        Pharm pharm = new Pharm();
 
-        pharm.code = store.getCode();
-        pharm.addr = store.getAddr();
-        pharm.createdAt = store.getCreated_at();
-        pharm.remainStat = store.getRemain_stat();
-        pharm.lat = store.getLat();
-        pharm.lng = store.getLng();
-        pharm.name = store.getName();
-        pharm.stockAt = store.getStock_at();
 
-        db.pharmDao().insertPharm(pharm);
+        String code = store.getCode();
+        int isExist = db.pharmDao().isExist(code);
+        String result;
+        if(isExist == 1){       //만약에 즐겨찾기에 이미 있고 그것을 삭제하는 것이라면
+            db.pharmDao().deleteSpecifiedPharm(code);       //code를 이용해 특정 튜플을 삭제하는 것으로 충분하다.
+            result = "즐겨찾기에서 삭제 완료";
+            //이후 아이콘 변경 필요 -> LiveData?
+        }else{      //만약에 새로 즐겨찾기에 추가하고자 한다면
+            Pharm pharm = new Pharm();
+
+            pharm.code = store.getCode();
+            pharm.addr = store.getAddr();
+            pharm.createdAt = store.getCreated_at();
+            pharm.remainStat = store.getRemain_stat();
+            pharm.lat = store.getLat();
+            pharm.lng = store.getLng();
+            pharm.name = store.getName();
+            pharm.stockAt = store.getStock_at();
+
+            db.pharmDao().insertPharm(pharm);
+            result = "즐겨찾기에 추가 완료";
+            //이후 아이콘 변경 필요. 그리고 잘 됐는지 그 결과값을 이용하여 처리해주는 것도 있으면 더 좋을 듯.
+        }
+        Toast.makeText(getContext(), result, Toast.LENGTH_LONG).show();
+        infoWindow.invalidate();    //이걸로 아이콘 변경이 될까?
+
 
         db.close();
         //테스팅 필요. + FavoriteFragment에서 불러와주는 코드 추가 필요. 
@@ -747,7 +764,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         private MaterialTextView updateIcon;    //업데이트 시간 옆 아이콘
         private MaterialTextView receiveIcon;   //물품 받은 시간 옆 아이콘
 
-        private View infoView;
+        private View infoView;              //Databinding 고려
+        MaterialButton buttonAddFavorite;
         CustomInfoViewAdapter(Context context, MapView mapView){
             super(context);
             infoView = LayoutInflater.from(getContext()).inflate(R.layout.info_view_custom, mapView, false);
@@ -762,7 +780,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
             updateIcon = infoView.findViewById(R.id.update_icon);
             receiveIcon = infoView.findViewById(R.id.receive_icon);
-            MaterialButton buttonAddFavorite = infoView.findViewById(R.id.button_add_favorite);
+            buttonAddFavorite = infoView.findViewById(R.id.button_add_favorite);
             buttonAddFavorite.setOnClickListener(MapFragment.this);
         }
 
@@ -852,6 +870,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
             address.setText(addr);
 
+
+            //누른 약국이 즐겨찾기에 이미 존재하는지 안하는지에 따른 아이콘 색 변경
+            db = AppDatabase.getInstance(getContext());
+            int isExist = db.pharmDao().isExist(store.getCode());
+            if(isExist == 1) buttonAddFavorite.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null));
+            db.close();
 
 
             return infoView;
