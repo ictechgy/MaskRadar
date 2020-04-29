@@ -22,14 +22,14 @@ public interface PharmDao {
     long insertPharm(Pharm pharm);      //추가 후 rowId값 반환
 
     @Update
-    LiveData<Integer> updatePharms(Pharm ...pharms);        //즐겨찾기 항목에 대한 새로고침
+    int updatePharms(Pharm ...pharms);        //즐겨찾기 항목에 대한 새로고침 - 사용자가 새로고침을 누르고 값을 다시 받으면 해당 사항을 db에 업뎃하는 작업
 
     @Delete
-    LiveData<Integer> deletePharm(Pharm pharm); //특정 즐겨찾기 약국 삭제
+    int deletePharm(Pharm pharm); //특정 즐겨찾기 약국 삭제
     @Query("delete from pharm where code = :code")
-    LiveData<Integer> deleteSpecifiedPharm(String code);        //또는 코드값만을 비교한 삭제
+    int deleteSpecifiedPharm(String code);        //또는 코드값만을 비교한 삭제
 
     @Query("delete from pharm")     //즐겨찾기 모두 삭제
-    void deletePharmAll();
+    int deletePharmAll();
 
 }

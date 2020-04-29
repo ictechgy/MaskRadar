@@ -57,6 +57,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraChangeListener, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener, Button.OnClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 777;
@@ -872,10 +875,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
 
             //누른 약국이 즐겨찾기에 이미 존재하는지 안하는지에 따른 아이콘 색 변경
-            db = AppDatabase.getInstance(getContext());
-            int isExist = db.pharmDao().isExist(store.getCode());
-            if(isExist == 1) buttonAddFavorite.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null));
-            db.close();
+
+            //db 접근은 UI와 별개의 쓰레드에서 작업해주어야 한다.
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(()->{
+                db = AppDatabase.getInstance(getContext());
+                int isExist = db.pharmDao().isExist(store.getCode());
+                if(isExist == 1) handler.post(()-> buttonAddFavorite.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null)));
+                db.close();
+            });
+
 
 
             return infoView;

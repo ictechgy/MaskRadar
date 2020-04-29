@@ -54,7 +54,6 @@
                     android:layout_weight="1"
                     app:icon="@drawable/ic_star_border_24px"
                     app:iconGravity="textEnd"
-                    android:backgroundTint="#FFFFFF"
                     app:iconTint="@color/colorSecondary"
                     android:gravity="center"
                     />
