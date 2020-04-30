@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -27,6 +28,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textview.MaterialTextView;
@@ -88,6 +91,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     private LatLng lastCoord;
 
     private AppDatabase db;
+
+    //private BottomSheetDialog bottomSheetDialogPharm;   //BottomSheetDialog 로 InfoView 변경
+    // -> 테스트 결과 간편하고 잘 작동하나 지도화면이 어두워지는 다이얼로그 특성이 남아있어 변경
+    private LinearLayout bottomSheetInfo;
+    private BottomSheetBehavior bottomSheetBehavior;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -241,6 +249,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         // + 네트워크 스테이터스 상황 읽어서 네트워크 없을 시 실행 안되게 해야 할듯. 네트워크 안되니 비정상 종료됨
         // + 권한관련 설명내용 필요할 듯. 등.
 
+        bottomSheetInfo = root.findViewById(R.id.bottom_sheet_info);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetInfo);
+
         return root;
     }
 
@@ -351,6 +362,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //픽셀단위 지도 반경 얻어오기(화면 기준) - 반지름 픽셀값을 원하므로 2로 나누어서 구함.
 
         //getMaskInfo();        //맵 로드 초기에도 onCameraIdle()이 최초 한번 작동하여 정보를 가져온다. 따라서 여기서 메소드 작동시킬 필요가 없다.
+
     }
     //카메라가 움직이는 도중에도 지도 마커 업데이트를 할 것인지, 움직임이 끝나고 사용자가 손을 떼면 업데이트를 할 것인지..
     //움직임이 끝나는 경우에 대한 리스너는 addOnCameraIdleListener 임.
@@ -549,6 +561,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
      */
     @Override
     public boolean onClick(@NonNull Overlay overlay) {
+        bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO, true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        //기존의 마커정보와 비교해서 동일한 마커를 다시 누른경우 시트를 닫아주는 작업이 필요함
+
         Marker oldMarker = infoWindow.getMarker();      //새로운 마커를 클릭했을 때 기존에 이미 클릭한 마커가 있다면? 마커가 눌려있다는 것은 인포윈도우가 살아있음을 의미한다.
         if(oldMarker != null){
             MarkerInfo info = (MarkerInfo)oldMarker.getTag();
@@ -710,7 +726,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     }
 
     @Override
-    public void onClick(View v) {   //InfoView 즐겨찾기 버튼 클릭 콜백 리스너
+    public void onClick(View v) {   //InfoView 즐겨찾기 버튼 클릭 콜백 리스너 -> 작동이 안된다. 별 아이콘도 보이지를 않고.. InfoView를 아예 BottomSheet으로 바꿔야 할 듯.
+                                                                //현재 네비게이션 메뉴 비활성화되는 문제도 해결해야함. 재클릭 안되게 하려 한건데..
+
         //Room 사용 예정.
         //추가한 약국에 대한 정보를 DB에 저장하고.. 흠. Favorite Fragment에서 해당 약국에 대한 정보는 어떻게 가져올까.
         //약국 고유 코드번호를 통해 get하는 API가 없기때문에 해당 좌표를 저장해놓고, 해당 좌표 기준으로 (반경은 0m?) 다시 가져온 뒤 데이터 검증(코드 일치여부 검사)

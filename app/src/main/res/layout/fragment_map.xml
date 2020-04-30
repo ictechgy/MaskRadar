@@ -6,45 +6,209 @@
     android:layout_height="match_parent"
     tools:context=".ui.map.MapFragment">
 
-    <com.naver.maps.map.MapView
-        android:id="@+id/map_view"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
-
-    </com.naver.maps.map.MapView>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         >
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="wrap_content"
+
+        <com.naver.maps.map.MapView
+            android:id="@+id/map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+        </com.naver.maps.map.MapView>
+
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="5dp"
-            app:cardUseCompatPadding="true"
-            app:contentPadding="3dp"
-            android:layout_gravity="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             >
-            <com.google.android.material.textview.MaterialTextView
-                android:fontFamily="@font/hanna_11yrs"
-                android:textSize="18sp"
-                android:padding="2dp"
-                android:textColor="@color/colorSecondary"
-                android:text="임시 텍스트"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/target_button"/>
-        </com.google.android.material.card.MaterialCardView>
-    </FrameLayout>
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp"
+                app:cardUseCompatPadding="true"
+                app:contentPadding="3dp"
+                android:layout_gravity="end"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:fontFamily="@font/hanna_11yrs"
+                    android:textSize="18sp"
+                    android:padding="2dp"
+                    android:textColor="@color/colorSecondary"
+                    android:text="임시 텍스트"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/target_button"/>
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/bottom_sheet_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_hideable="true"
+            app:behavior_peekHeight="0dp"
+            >
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp"
+                app:cardUseCompatPadding="true"
+                app:contentPadding="3dp"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/status_view"
+                        android:layout_width="15dp"
+                        android:layout_height="match_parent"
+                        />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingStart="5dp"
+                        >
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/store_name"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:text="메디팜신마포약국"
+                                android:textSize="20sp"
+                                android:textColor="@color/design_default_color_on_secondary"
+                                android:fontFamily="@font/nanum_square"
+                                android:layout_weight="5"
+                                android:gravity="center_vertical"
+                                />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/button_add_favorite"
+                                android:layout_width="0dp"
+                                android:layout_height="36dp"
+                                android:layout_weight="1"
+                                app:icon="@drawable/ic_star_border_24px"
+                                app:iconGravity="textEnd"
+                                app:iconTint="@color/colorSecondary"
+                                android:gravity="center"
+                                />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="5dp"
+                            android:layout_margin="5dp">
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/stock"
+                                android:textSize="15sp"
+                                android:fontFamily="@font/hanna_air"
+                                />
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/stock_status"
+                                android:layout_marginStart="3dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="충분"
+                                android:textSize="15sp"
+                                android:fontFamily="@font/hanna_11yrs"
+                                />
+
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_margin="2dp"
+                            >
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/update_icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="@string/update"
+                                android:drawableLeft="@drawable/ic_update_24px"
+                                />
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_marginStart="10dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="~시 ~분"
+                                android:layout_marginEnd="10dp"
+                                android:id="@+id/update_time"
+                                />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginStart="2dp"
+                            >
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/receive_icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="@string/receive"
+                                android:drawableLeft="@drawable/ic_move_to_inbox_24px"
+                                />
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_marginStart="10dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="~시 ~분"
+                                android:id="@+id/receive_time"
+                                />
+                        </LinearLayout>
+
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:textAlignment="viewEnd"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="서울특별시 마포구 창전로 45 103동 108호"
+                            android:layout_marginEnd="20dp"
+                            android:fontFamily="@font/jua"
+                            android:id="@+id/address"
+                            />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <ProgressBar
         android:layout_width="wrap_content"
