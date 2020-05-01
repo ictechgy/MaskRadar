@@ -78,7 +78,7 @@
                     android:layout_height="match_parent"
                     android:orientation="horizontal">
                     <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/status_view"
+                        android:id="@+id/bottom_sheet_status_view"
                         android:layout_width="15dp"
                         android:layout_height="match_parent"
                         />
@@ -95,7 +95,7 @@
                             android:orientation="horizontal"
                             >
                             <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/store_name"
+                                android:id="@+id/bottom_sheet_store_name"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:text="메디팜신마포약국"
@@ -107,7 +107,7 @@
                                 />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/button_add_favorite"
+                                android:id="@+id/bottom_sheet_button_add_favorite"
                                 android:layout_width="0dp"
                                 android:layout_height="36dp"
                                 android:layout_weight="1"
@@ -132,7 +132,7 @@
                                 android:fontFamily="@font/hanna_air"
                                 />
                             <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/stock_status"
+                                android:id="@+id/bottom_sheet_stock_status"
                                 android:layout_marginStart="3dp"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -150,7 +150,7 @@
                             >
 
                             <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/update_icon"
+                                android:id="@+id/bottom_sheet_update_icon"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="@string/update"
@@ -162,7 +162,7 @@
                                 android:layout_height="match_parent"
                                 android:text="~시 ~분"
                                 android:layout_marginEnd="10dp"
-                                android:id="@+id/update_time"
+                                android:id="@+id/bottom_sheet_update_time"
                                 />
 
 
@@ -175,7 +175,7 @@
                             android:layout_marginStart="2dp"
                             >
                             <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/receive_icon"
+                                android:id="@+id/bottom_sheet_receive_icon"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="@string/receive"
@@ -186,7 +186,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="~시 ~분"
-                                android:id="@+id/receive_time"
+                                android:id="@+id/bottom_sheet_receive_time"
                                 />
                         </LinearLayout>
 
@@ -198,7 +198,7 @@
                             android:text="서울특별시 마포구 창전로 45 103동 108호"
                             android:layout_marginEnd="20dp"
                             android:fontFamily="@font/jua"
-                            android:id="@+id/address"
+                            android:id="@+id/bottom_sheet_address"
                             />
 
                     </LinearLayout>

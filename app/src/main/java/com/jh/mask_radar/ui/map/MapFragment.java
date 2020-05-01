@@ -565,6 +565,65 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         //기존의 마커정보와 비교해서 동일한 마커를 다시 누른경우 시트를 닫아주는 작업이 필요함
 
+        //BottomSheet로 기존의 InfoView를 대체합니다.
+        Marker marker = (Marker)overlay;
+        MarkerInfo info = (MarkerInfo) marker.getTag();
+        Store store = mapViewModel.getStores().getValue().get(info.getIndex());
+
+        String status;
+        int color;
+        switch (store.getRemain_stat()){
+            case "plenty":
+                color = R.color.colorPlenty;
+                status = "충분(100개 이상)";
+                break;
+            case "some":
+                color = R.color.colorSome;
+                status = "어느 정도 있음(30개 이상)";
+                break;
+            case "few":
+                color = R.color.colorFew;
+                status = "부족(30개 미만)";
+                break;
+            case "empty":
+                color = R.color.colorEmpty;
+                status = "없음(품절)";
+                break;
+            default:
+                color = R.color.colorNoSale;
+                status = "판매 중지";
+                break;
+        }
+
+        MaterialTextView stockStatus = bottomSheetInfo.findViewById(R.id.bottom_sheet_stock_status);
+        View statusView = bottomSheetInfo.findViewById(R.id.bottom_sheet_status_view);
+        MaterialTextView updateIcon = bottomSheetInfo.findViewById(R.id.bottom_sheet_update_icon);
+        MaterialTextView receiveIcon = bottomSheetInfo.findViewById(R.id.bottom_sheet_receive_icon);
+        MaterialTextView storeName = bottomSheetInfo.findViewById(R.id.bottom_sheet_store_name);
+        MaterialTextView updateTime = bottomSheetInfo.findViewById(R.id.bottom_sheet_update_time);
+        MaterialTextView receiveTime = bottomSheetInfo.findViewById(R.id.bottom_sheet_receive_time);
+        MaterialTextView address = bottomSheetInfo.findViewById(R.id.bottom_sheet_address);
+
+        stockStatus.setText(status);
+        int newColor = getContext().getResources().getColor(color, null);
+        statusView.setBackgroundColor(newColor);
+        stockStatus.setTextColor(newColor);
+
+        updateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
+        receiveIcon.getCompoundDrawables()[0].setTint(newColor);
+
+        storeName.setText(store.getName());
+        updateTime.setText(store.getCreated_at());
+        receiveTime.setText(store.getStock_at());
+
+        String addr = store.getAddr();
+        int idx = addr.indexOf("(");
+        if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
+        address.setText(addr);
+
+
+
+        /*
         Marker oldMarker = infoWindow.getMarker();      //새로운 마커를 클릭했을 때 기존에 이미 클릭한 마커가 있다면? 마커가 눌려있다는 것은 인포윈도우가 살아있음을 의미한다.
         if(oldMarker != null){
             MarkerInfo info = (MarkerInfo)oldMarker.getTag();
@@ -589,6 +648,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             infoWindow.close();     //기존 마커의 infoWindow는 닫는다.
             if (oldMarker.equals(overlay)) return true; //새로 누른 마커와 기존 인포 띄워져 있던 마커가 같은경우? -> 기존 마커를 누른 경우이므로 인포만 닫고 종료.
         }
+
+         */
         //infoWindow가 없는데 새롭게 마커를 눌렀거나 다른 마커를 누른 경우 아래로 진행.
 
         //int index = (int)overlay.getTag();              //tag값 == Markers에서 marker의 위치값 == stores에서 store의 위치값.
@@ -604,6 +665,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //아니면 마커끼리 비교해서 중복마커만 선별해놓을 수 있나..? 중복마커만 살려놓는 방식으로.. 또는 네이버나 카카오처럼 별도의 '이 영역에서 찾기' 할 수도 있음..
 
         //태그를 재정의 함으로서 다시 작성.
+        /*
         MarkerInfo info = (MarkerInfo)overlay.getTag(); //새로 누른 마커에 대한 정보 가져오기.
         Store store;
         try {
@@ -621,6 +683,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //클릭한 마커모양 변경 및 정보창 띄우기.
         Marker marker = (Marker)overlay;
 
+         */
+
         /*
         이렇게 해서 마커 다시 원래대로 되돌릴때도 store얻은 다음에 .getType으로 어떤 마커였는지 다 확인하고 다시 작업하는 그러는 것보다는 Tag에 타입값을 넣어두는 것이 좋을 것 같다.
         int resId;
@@ -637,6 +701,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         }
         marker.setIcon(OverlayImage.fromResource(resId));           //다른 마커 클릭하거나 지도 부분 클릭시 원래대로 되돌리는 기능 필요.
         */
+        /*
         int iconId;
         switch (info.getType()){
             case "01":
@@ -658,8 +723,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         if(marker.getInfoWindow() != null){
             infoWindow.close();         //마커에 대해 정보창이 이미 열려있을 때 마커를 한번 더 누르면 정보창 닫기.
             //oldMarker를 이용한 처리로 이 if종속문은 없어도 됨.
-        }else{
+        }else {
             infoWindow.open(marker);        //해당 마커에 대해 정보창 띄우기.
+        }
+        */
 
             /*
             //infoWindow가 지도 바깥쪽에 생길 때 잘리는 현상 발생. 따라서 infoWindow에 offset을 두어 온전하게 보이게 하려고 함.
@@ -701,8 +768,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             똑같은 API를 쓴다면.. 해당 약국 고유번호와 좌표 기억해뒀다가 재쿼리 한 후(반경은 좁게) 그 후에 고유번호 같은 데이터만 걸러서 즐겨찾기 화면에 Text값으로 출력.
             내 주변 약국 보기 목록같은것도 있으면 좋고.... (검색반경 조절 가능하게 한다던가. 내 위치와의 거리도 표시한다던가.)
              */
-
-        }
 
         //infoWindow.setOnClickListener();      정보창 클릭 리스너.
 
