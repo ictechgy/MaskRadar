@@ -64,7 +64,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraChangeListener, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener, Button.OnClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 777;
     private FusedLocationSource locationSource;
     private LatLng oldPosition;
@@ -81,11 +81,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
     private Handler handler;        //Stores 정보 fetch 완료시 별도 쓰레드에서 마커 목록을 생성하고 그 쓰레드에서 메인 쓰레드로 해당 데이터들을 넘겨주기 위한 핸들러
     private ArrayList<Marker> markers;
-    private InfoWindow infoWindow;
-    private CustomInfoViewAdapter adapter;
-    private NavViewHeightReturnSender sender;
+    //private InfoWindow infoWindow;
+    //private CustomInfoViewAdapter adapter;
+    //private NavViewHeightReturnSender sender;
 
-    private ArrayList<Store> oldStores;
+    //private ArrayList<Store> oldStores;
 
     private SharedPreferences pref;
     private LatLng lastCoord;
@@ -94,8 +94,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
     //private BottomSheetDialog bottomSheetDialogPharm;   //BottomSheetDialog 로 InfoView 변경
     // -> 테스트 결과 간편하고 잘 작동하나 지도화면이 어두워지는 다이얼로그 특성이 남아있어 변경
-    private LinearLayout bottomSheetInfo;
-    private BottomSheetBehavior bottomSheetBehavior;
+    private BottomSheetBehavior bottomSheetBehavior;    //BottomSheet객체를 다룰 Behavior객체
+    private MaterialTextView stockStatus;
+    private View statusView;
+    private MaterialTextView updateIcon;
+    private MaterialTextView receiveIcon;
+    private MaterialTextView storeName;
+    private MaterialTextView updateTime;
+    private MaterialTextView receiveTime;
+    private MaterialTextView address;
+    private Marker oldMarker;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -155,12 +163,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
         mapViewModel.setRequestQueue(requestQueue); //viewModel로 requestQueue 전달
 
-        mapViewModel.getStores().observe(getViewLifecycleOwner(), new Observer<List<Store>>() {
-            @Override
-            public void onChanged(List<Store> stores) {
-                reflectChanges(stores);
-            }   //지도상의 Store정보 관측
-        });
+        mapViewModel.getStores().observe(getViewLifecycleOwner(), this::reflectChanges);
+        //지도상의 Store정보 관측
 
         View root = inflater.inflate(R.layout.fragment_map, container, false);
         progressBar = root.findViewById(R.id.map_progressBar);
@@ -249,8 +253,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         // + 네트워크 스테이터스 상황 읽어서 네트워크 없을 시 실행 안되게 해야 할듯. 네트워크 안되니 비정상 종료됨
         // + 권한관련 설명내용 필요할 듯. 등.
 
-        bottomSheetInfo = root.findViewById(R.id.bottom_sheet_info);
+        LinearLayout bottomSheetInfo = root.findViewById(R.id.bottom_sheet_info);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetInfo);
+        stockStatus = root.findViewById(R.id.bottom_sheet_stock_status);
+        statusView = root.findViewById(R.id.bottom_sheet_status_view);
+        updateIcon = root.findViewById(R.id.bottom_sheet_update_icon);
+        receiveIcon = root.findViewById(R.id.bottom_sheet_receive_icon);
+        storeName = root.findViewById(R.id.bottom_sheet_store_name);
+        updateTime = root.findViewById(R.id.bottom_sheet_update_time);
+        receiveTime = root.findViewById(R.id.bottom_sheet_receive_time);
+        address = root.findViewById(R.id.bottom_sheet_address);
+
+        //....DataBinding or ViewBinding..
 
         return root;
     }
@@ -293,9 +307,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        /*
         if(context instanceof NavViewHeightReturnSender){
             sender = (NavViewHeightReturnSender) context;
         }
+        BottomNav를 쓰지 않으므로 필요 없음
+         */
     }
 
     @Override
@@ -323,7 +340,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             }
         }
          */
-        //마지막 위치값으로 지도 중심점 이동
+        //마지막 위치값으로 지도 중심점 이동 -> SharedPreferences 사용함
         if(lastCoord != null && !naverMap.getCameraPosition().target.equals(lastCoord)){
             CameraUpdate cameraUpdate = CameraUpdate.scrollTo(lastCoord).animate(CameraAnimation.None);
             naverMap.moveCamera(cameraUpdate);
@@ -346,13 +363,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         naverMap.setMinZoom(13);        //축소 레벨 제한. 지나치게 축소하는 경우 마커를 그리는 수가 많아져서 성능저하.
 
         projection = naverMap.getProjection();
+
+        /*
         infoWindow = new InfoWindow();  //마커 정보창용 객체 인스턴스화
         adapter = new CustomInfoViewAdapter(getContext(), mapView); //InfoWindow 에 대해 커스텀 어댑터 생성
         infoWindow.setAdapter(adapter);     //infoWindow.open이 호출 될 때마다 어댑터 내부의 getContentView 호출.
+         */
 
         naverMap.setOnMapClickListener(this);       //맵에서 특정부분 그냥 클릭시 정보창은 닫는다.
 
-        naverMap.addOnCameraChangeListener(this);   //카메라 이동에 대한 리스너 - 일단 작동하는 것은 없음
+        //naverMap.addOnCameraChangeListener(this);   //카메라 이동에 대한 리스너 - 일단 작동하는 것은 없음
         naverMap.addOnCameraIdleListener(this);     //카메라 이동 완료 리스너 - 이동 완료시 약국 정보 다시 fetch
 
         int contentWidthHalf = naverMap.getContentWidth()/2;
@@ -367,18 +387,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     //카메라가 움직이는 도중에도 지도 마커 업데이트를 할 것인지, 움직임이 끝나고 사용자가 손을 떼면 업데이트를 할 것인지..
     //움직임이 끝나는 경우에 대한 리스너는 addOnCameraIdleListener 임.
 
+    /*
     /**
      * parameter description by Naver Corp.
      * @param i means 'cause of movement'
      * @param b means 'True if the animation effect is applied and moving, false if not.'
      */
+
+    /*
     @Override
     public void onCameraChange(int i, boolean b) {
         //do something?
     }
+     */
 
     @Override
     public void onCameraIdle() {        //카메라 움직임이 끝난 경우. - onMapReady 이후에 기본적으로 최초 한번 호출.
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         LatLng newPosition = naverMap.getCameraPosition().target;
         if(oldPosition != null && oldPosition.equals(newPosition)){
             return;
@@ -452,10 +477,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         double radius = radiusPixel * projection.getMetersPerPixel();   //반지름을 구성하는 픽셀의 개수(기기별 불변) * 반지름의 픽셀당 미터값 (유동)
 
         //mapViewModel.getMaskInfo(coord, radius); //통신 시작. 넘겨주는 값은 현재 중심점 좌표와 반경m값.
-        mapViewModel.getMaskInfo(oldPosition, radius);
+        mapViewModel.getMaskInfo(oldPosition, radius);      //어차피 oldPosition 값을 새로 세팅하고 이 메소드를 호출하므로 oldPosition으로 넘겨줘도 괜찮다.
     }
 
-    private void reflectChanges(final List<Store> stores){      //observation callback. 데이터 변경 발생시 호출
+    private void reflectChanges(final List<Store> stores){      //observation callback. Store 데이터 변경 발생시 호출
         if(stores == null){     //초기 화면 로딩 시 정
             // (초기에 맵이 떴을 때 비동기적으로 약국 정보를 받아오는데, 아직 받아오지 못해서 null인 경우 - ViewModel에서도 해당 값은 초기값으로 null로 설정)
             progressBar.setVisibility(View.VISIBLE);
@@ -468,7 +493,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
 
         //정상적으로 자료를 받은 경우.
-        ExecutorService executorService = Executors.newSingleThreadExecutor();  //싱글스레드 받아오기
+        ExecutorService executorService = Executors.newSingleThreadExecutor();  //싱글스레드 받아오기 from ThreadPool
         executorService.execute(() -> {
             markers = new ArrayList<>();        //데이터를 받아올 때마다 새로 선언해주는 것이 나을 거같다. 데이터가 많아졌다가 적어졌을 때 메모리 적게 잡기 위해.
             for(Store store : stores){          //데이터 받아서 각각 파싱한 store객체 하나당 마커 하나를 생성해주는 반복문이다.
@@ -561,14 +586,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
      */
     @Override
     public boolean onClick(@NonNull Overlay overlay) {
-        bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO, true);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        //기존의 마커정보와 비교해서 동일한 마커를 다시 누른경우 시트를 닫아주는 작업이 필요함
-
-        //BottomSheet로 기존의 InfoView를 대체합니다.
+        //마커가 클릭됐는지, 기존마커인지 등에 따른 처리 -> isMarkerClicked 및 oldMarker로 해결
         Marker marker = (Marker)overlay;
         MarkerInfo info = (MarkerInfo) marker.getTag();
         Store store = mapViewModel.getStores().getValue().get(info.getIndex());
+
+        if(oldMarker != null){  //마커가 이미 눌려있다면 기존의 마커는 닫아준다.
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+            int iconId;
+            switch(info.getType()){
+                case "01":
+                    iconId = R.drawable.ic_unselected_pharm;
+                    break;
+                case "02":
+                    iconId = R.drawable.ic_unselected_post_office;
+                    break;
+                default:
+                    iconId = R.drawable.ic_unselected_nh;
+                    break;
+            }
+            oldMarker.setIcon(OverlayImage.fromResource(iconId));
+            oldMarker.setWidth((int)getResources().getDimension(R.dimen.marker_width_unselected));
+            oldMarker.setHeight((int)getResources().getDimension(R.dimen.marker_height_unselected));
+
+            if(oldMarker.equals(marker)) {
+                oldMarker = null;
+                return true;   //이미 열려있는 마커를 눌러 닫으려 한경우 여기서 끝.
+            }
+        }
+
+        //새로운 마커를 클릭한 경우/처음 마커를 클릭한 경우 포함
+        bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO, true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
         String status;
         int color;
@@ -595,15 +645,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 break;
         }
 
-        MaterialTextView stockStatus = bottomSheetInfo.findViewById(R.id.bottom_sheet_stock_status);
-        View statusView = bottomSheetInfo.findViewById(R.id.bottom_sheet_status_view);
-        MaterialTextView updateIcon = bottomSheetInfo.findViewById(R.id.bottom_sheet_update_icon);
-        MaterialTextView receiveIcon = bottomSheetInfo.findViewById(R.id.bottom_sheet_receive_icon);
-        MaterialTextView storeName = bottomSheetInfo.findViewById(R.id.bottom_sheet_store_name);
-        MaterialTextView updateTime = bottomSheetInfo.findViewById(R.id.bottom_sheet_update_time);
-        MaterialTextView receiveTime = bottomSheetInfo.findViewById(R.id.bottom_sheet_receive_time);
-        MaterialTextView address = bottomSheetInfo.findViewById(R.id.bottom_sheet_address);
-
         stockStatus.setText(status);
         int newColor = getContext().getResources().getColor(color, null);
         statusView.setBackgroundColor(newColor);
@@ -620,7 +661,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         int idx = addr.indexOf("(");
         if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
         address.setText(addr);
+        //여기까지 BottomSheet 설정. 아래서부터는 마커 설정
 
+        int iconId;
+        switch (info.getType()){
+            case "01":
+                iconId = R.drawable.ic_marker_pharm;
+                break;
+            case "02":
+                iconId = R.drawable.ic_marker_post_office;
+                break;
+            default:
+                iconId = R.drawable.ic_marker_nh;
+                break;
+        }
+        marker.setIcon(OverlayImage.fromResource(iconId));
+
+        marker.setWidth((int)getResources().getDimension(R.dimen.marker_width));
+        marker.setHeight((int)getResources().getDimension(R.dimen.marker_height));
+
+        oldMarker = marker;
 
 
         /*
@@ -790,6 +850,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         return true;    //이벤트 소비(지도로 전파 x) -> 지도로 전파시 온전히 작동하지 않는것으로 보임.
     }
 
+    /*
     @Override
     public void onClick(View v) {   //InfoView 즐겨찾기 버튼 클릭 콜백 리스너 -> 작동이 안된다. 별 아이콘도 보이지를 않고.. InfoView를 아예 BottomSheet으로 바꿔야 할 듯.
                                                                 //현재 네비게이션 메뉴 비활성화되는 문제도 해결해야함. 재클릭 안되게 하려 한건데..
@@ -836,6 +897,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         //Pharm DTO와 Store객체를 통합하면 어떨까.
     }
+
+     */
+
+    /*
+    InfoView를 더이상 사용하지 않으므로 밑의 InfoView용 Adapter클래스는 더이상 사용하지 않습니다.!!!!
 
     private class CustomInfoViewAdapter extends InfoWindow.DefaultViewAdapter{       //마커를 눌렀을 시 나오는 InfoWindow에 대한 CustomAdapter
         private Store store;
@@ -894,7 +960,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             //View infoView = inflater.inflate(R.layout.info_view_custom, root, false);
             //누를 때마다 계속 inflate 시키는게 과연 좋을까..? inflate하는 부분을 생성자에다 놓아둘까? 최초 한번만 inflate 시키도록. -> ok 잘 된다.
 
-            /*
+            //
             아래 바인딩 구문들도 모두 생성자로 이전.
             statusView = infoView.findViewById(R.id.status_view);
             storeName = infoView.findViewById(R.id.store_name);
@@ -905,7 +971,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
             updateIcon = infoView.findViewById(R.id.update_icon);
             receiveIcon = infoView.findViewById(R.id.receive_icon);     //아이콘 색도 재고 상태에 따라 변경 필요함.. <- 근데 왜 id 조회가 안되냐.
-             */
+            //
 
             int color;
             String status;
@@ -975,9 +1041,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             //infoWindow.getMarker().getTag()를 이용해 클릭된 마커에 대한 정보를 가져올 수도 있다.
         }
     }
+    */
 
     @Override
     public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {    //맵의 다른 부분을 그냥 클릭한 경우 infowindow 닫고 마커도 원래 모양으로 되돌린다.
+        if(oldMarker != null){
+            MarkerInfo info = (MarkerInfo)oldMarker.getTag();
+            int iconId;
+            switch (info.getType()){
+                case "01":
+                    iconId = R.drawable.ic_unselected_pharm;
+                    break;
+                case "02":
+                    iconId = R.drawable.ic_unselected_post_office;
+                    break;
+                default:
+                    iconId = R.drawable.ic_unselected_nh;
+                    break;
+            }
+            oldMarker.setIcon(OverlayImage.fromResource(iconId));
+
+            oldMarker.setWidth((int)getResources().getDimension(R.dimen.marker_width_unselected));
+            oldMarker.setHeight((int)getResources().getDimension(R.dimen.marker_height_unselected));
+
+            oldMarker = null;
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+
+        /*
         Marker marker = infoWindow.getMarker();
         if(marker != null){
             MarkerInfo info = (MarkerInfo)marker.getTag();
@@ -1001,6 +1092,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
             infoWindow.close();
         }
+
+         */
     }
 
     //나중에는 즐겨찾기 기능, 재고 들어올 시 알람기능 등..
