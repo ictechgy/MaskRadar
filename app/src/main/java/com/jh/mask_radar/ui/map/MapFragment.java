@@ -9,6 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,6 +120,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         if(pref!=null && pref.contains("latitude") && pref.contains("longitude")){
             lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
         }
+
+        db = AppDatabase.getInstance(getContext());
     }
     //현재 내 위치 버튼을 누른 경우 '데이터와 GPS 켜져있고 관련 권한 허용상태'인데도 비정상 종료가 발생하는 경우 있음
     //네트워크 및 GPS ON/OFF, 허용 여부에 따른 LocationTrackingMode 활성화 상태 변경 및 기타 상황에 대한 제어 처리 필요할 것 같음. 네트워크가 꺼져있으면 앱이 시작되지 않게 한다던지 등.
@@ -162,7 +166,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         requestQueue = Volley.newRequestQueue(getContext());
         mapViewModel = new ViewModelProvider(this).get(MapViewModel.class);
-        mapViewModel.setRequestQueue(requestQueue); //viewModel로 requestQueue 전달
+        mapViewModel.setRequestQueue(requestQueue, getString(R.string.MASK_URL)); //viewModel로 requestQueue 전달
 
         mapViewModel.getStores().observe(getViewLifecycleOwner(), this::reflectChanges);
         //지도상의 Store정보 관측
@@ -595,7 +599,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         Store store = mapViewModel.getStores().getValue().get(info.getIndex());
 
         if(oldMarker != null){  //마커가 이미 눌려있다면 기존의 마커는 닫아준다.
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
             int iconId;
             switch(info.getType()){
@@ -614,6 +617,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
             oldMarker.setHeight((int)getResources().getDimension(R.dimen.marker_height_unselected));
 
             if(oldMarker.equals(marker)) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 oldMarker = null;
                 return true;   //이미 열려있는 마커를 눌러 닫으려 한경우 여기서 끝.
             }
@@ -622,6 +626,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //새로운 마커를 클릭한 경우/처음 마커를 클릭한 경우 포함
         bottomSheetBehavior.setPeekHeight(BottomSheetBehavior.PEEK_HEIGHT_AUTO, true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
 
         String status;
         int color;
@@ -664,6 +669,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         int idx = addr.indexOf("(");
         if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
         address.setText(addr);
+
+        addToFavoriteButton.setIconTintResource(color);
         //여기까지 BottomSheet 설정. 아래서부터는 마커 설정
 
         int iconId;
@@ -687,19 +694,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
 
         //아래의 코드는 즐겨찾기 DB에 저장되어있는지를 파악하여 즐겨찾기 아이콘을 바꾼다.
-        db = AppDatabase.getInstance(getContext());
         String code = store.getCode();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(()->{
             int isExist = db.pharmDao().isExist(code);  //즐겨찾기 버튼을 누른경우 해당 약국이 즐겨찾기에 있는지 검증
             if(isExist == 1){
-                handler.post(()-> addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_border_24px, null)));
-            }else{
                 handler.post(()-> addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null)));
+            }else{
+                handler.post(()-> addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_border_24px, null)));
             }
         });
-        db.close();
 
 
         /*
@@ -871,7 +876,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
     @Override
     public void onClick(View v) {       //BottomSheet에서 즐겨찾기를 누른 경우
-        db = AppDatabase.getInstance(getContext());
         MarkerInfo info = (MarkerInfo) oldMarker.getTag();
         Store store = mapViewModel.getStores().getValue().get(info.getIndex());
 
@@ -905,7 +909,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 });
             }
         });
-        db.close();
     }
 
     /*
@@ -1208,7 +1211,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         mapView.onLowMemory();
     }
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        AppDatabase.destroyInstance();
+    }
 }
 
 

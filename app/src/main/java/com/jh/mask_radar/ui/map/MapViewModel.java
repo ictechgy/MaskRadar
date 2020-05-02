@@ -24,7 +24,7 @@ import java.util.List;
 
 public class MapViewModel extends ViewModel {
 
-    private static final String MASK_URL = "https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/storesByGeo/json?";
+    private String MASK_URL;
 
     private Result result;     //서버에서 받아온 값의 결과를 가지는 변수. 필요한가?
     private MutableLiveData<List<Store>> stores;
@@ -40,8 +40,9 @@ public class MapViewModel extends ViewModel {
         return stores;
     }
 
-    void setRequestQueue(RequestQueue requestQueue){
+    void setRequestQueue(RequestQueue requestQueue, String url){
         this.requestQueue = requestQueue;
+        MASK_URL = url;
     }
 
     void getMaskInfo(final LatLng coord, final double radius){      //마스크 정보 가져오기. 필요한 값: 지도 중심점 좌표와 반경 반지름

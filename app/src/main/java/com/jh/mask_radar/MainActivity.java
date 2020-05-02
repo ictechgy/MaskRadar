@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -60,23 +61,19 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
         //navView.setOnNavigationItemReselectedListener(this);
 
         //navigationView에 대한 reselect 처리 필요!!!! <- 최우선 과제
-        }
+        previousMenuId = -1;
+    }
+
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {       //해결 완료
         Log.e("onOptionsItem", "작동");
+        if(previousMenuId != -1) navigationView.getMenu().findItem(previousMenuId).setEnabled(true);
         previousMenuId = navigationView.getCheckedItem().getItemId();
         navigationView.getCheckedItem().setEnabled(false);
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onOptionsMenuClosed(Menu menu) {
-        navigationView.getMenu().findItem(previousMenuId).setEnabled(true);
-        super.onOptionsMenuClosed(menu);
-    }
-    //왜 작동을 안하는 것인가?!?!? 으아아ㅏㅏㅏ
 
     @Override
     public int getNavViewHeight(){

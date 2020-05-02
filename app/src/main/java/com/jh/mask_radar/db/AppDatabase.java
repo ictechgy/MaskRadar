@@ -24,4 +24,11 @@ public abstract class AppDatabase extends RoomDatabase {
 
     }
 
+    public static void destroyInstance(){
+        if(INSTANCE != null){
+            if (INSTANCE.isOpen()) INSTANCE.close();
+            INSTANCE = null;
+        }
+    }
+
 }
