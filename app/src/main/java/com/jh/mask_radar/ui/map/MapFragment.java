@@ -64,7 +64,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener, MaterialButton.OnClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 777;
     private FusedLocationSource locationSource;
     private LatLng oldPosition;
@@ -103,6 +103,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     private MaterialTextView updateTime;
     private MaterialTextView receiveTime;
     private MaterialTextView address;
+    private MaterialButton addToFavoriteButton;
     private Marker oldMarker;
 
     @Override
@@ -263,6 +264,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         updateTime = root.findViewById(R.id.bottom_sheet_update_time);
         receiveTime = root.findViewById(R.id.bottom_sheet_receive_time);
         address = root.findViewById(R.id.bottom_sheet_address);
+        addToFavoriteButton = root.findViewById(R.id.bottom_sheet_button_add_favorite);
+        addToFavoriteButton.setOnClickListener(this);
 
         //....DataBinding or ViewBinding..
 
@@ -683,6 +686,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         oldMarker = marker;
 
 
+        //아래의 코드는 즐겨찾기 DB에 저장되어있는지를 파악하여 즐겨찾기 아이콘을 바꾼다.
+        db = AppDatabase.getInstance(getContext());
+        String code = store.getCode();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(()->{
+            int isExist = db.pharmDao().isExist(code);  //즐겨찾기 버튼을 누른경우 해당 약국이 즐겨찾기에 있는지 검증
+            if(isExist == 1){
+                handler.post(()-> addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_border_24px, null)));
+            }else{
+                handler.post(()-> addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null)));
+            }
+        });
+        db.close();
+
+
         /*
         Marker oldMarker = infoWindow.getMarker();      //새로운 마커를 클릭했을 때 기존에 이미 클릭한 마커가 있다면? 마커가 눌려있다는 것은 인포윈도우가 살아있음을 의미한다.
         if(oldMarker != null){
@@ -848,6 +867,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //그리고 클릭한 마커 지점에 대해서만 캡션으로 지점 이름, 서브캡션으로 재고량 표시되도록 하자. 모두 다 표시하는 것보다는 그게 깔끔할 듯.
 
         return true;    //이벤트 소비(지도로 전파 x) -> 지도로 전파시 온전히 작동하지 않는것으로 보임.
+    }
+
+    @Override
+    public void onClick(View v) {       //BottomSheet에서 즐겨찾기를 누른 경우
+        db = AppDatabase.getInstance(getContext());
+        MarkerInfo info = (MarkerInfo) oldMarker.getTag();
+        Store store = mapViewModel.getStores().getValue().get(info.getIndex());
+
+        String code = store.getCode();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(()->{
+            int isExist = db.pharmDao().isExist(code);  //즐겨찾기 버튼을 누른경우 해당 약국이 즐겨찾기에 있는지 검증
+            if(isExist == 1){
+                db.pharmDao().deleteSpecifiedPharm(code);
+                handler.post(()->{
+                    addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_border_24px, null));
+                    Toast.makeText(getContext(), "즐겨찾기에서 삭제되었습니다.", Toast.LENGTH_LONG).show();
+                });
+            }else{
+                Pharm pharm = new Pharm();
+
+                pharm.code = store.getCode();
+                pharm.addr = store.getAddr();
+                pharm.createdAt = store.getCreated_at();
+                pharm.remainStat = store.getRemain_stat();
+                pharm.lat = store.getLat();
+                pharm.lng = store.getLng();
+                pharm.name = store.getName();
+                pharm.stockAt = store.getStock_at();
+                db.pharmDao().insertPharm(pharm);
+
+                handler.post(()->{
+                    addToFavoriteButton.setIcon(getResources().getDrawable(R.drawable.ic_star_24px, null));
+                    Toast.makeText(getContext(), "즐겨찾기에 추가 완료!", Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+        db.close();
     }
 
     /*
