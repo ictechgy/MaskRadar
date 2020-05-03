@@ -33,3 +33,6 @@ public class FavoriteFragment extends Fragment {
         return root;
     }
 }
+
+//추가해야하는 기능. 즐겨찾기 화면 완성 및 업데이트 기능, 알람기능은 서버구축 필요
+//더불어서 있으면 좋을만한 기능 - 휴일지킴이 약국 표시 및 약국별 운영여부 표시(운영시간)
