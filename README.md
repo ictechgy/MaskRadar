@@ -4,7 +4,8 @@
 
      현재 지도부분만 구현된 상태입니다.   
      다른 부분 구현하는대로 업데이트 예정
-     -> BottomNav를 SideNavigationView로 변경 중 !! && 기타 여러 사항 변경중에 있습니다.
+     -> 네비게이션 위치를 변경하였으며 즐겨찾기 기능 추가중입니다. 
+     -> 현재 구글 플레이스토어 정책 강화로 인하여 어플리케이션 검색이 되지 않습니다. 한국 정보화 진흥원에 앱 등록을 문의한 후, 플레이스토어에 재 개시 될 수 있도록 하겠습니다. 
   
 #### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>   
 #### 개인정보 처리방침: <https://developerahn.blogspot.com/2020/03/blog-post.html>   
