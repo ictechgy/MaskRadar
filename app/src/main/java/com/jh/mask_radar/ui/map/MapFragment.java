@@ -901,6 +901,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 pharm.lng = store.getLng();
                 pharm.name = store.getName();
                 pharm.stockAt = store.getStock_at();
+                pharm.type = store.getType();
                 db.pharmDao().insertPharm(pharm);
 
                 handler.post(()->{
@@ -1215,6 +1216,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     public void onDestroy() {
         super.onDestroy();
         AppDatabase.destroyInstance();
+        requestQueue = null;
     }
 }
 

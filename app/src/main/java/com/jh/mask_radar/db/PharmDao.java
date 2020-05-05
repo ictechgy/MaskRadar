@@ -11,8 +11,8 @@ import java.util.List;
 
 @Dao
 public interface PharmDao {
-    @Query("SELECT * FROM PHARM")
-    LiveData<List<Pharm>> getAll();       //FavoriteFragment에서 필요한 기능
+    @Query("select * from pharm")
+    List<Pharm> getAll();       //FavoriteFragment에서 필요한 기능
 
     //지도에서 클릭한 약국이 이미 즐겨찾기에 존재하는 약국인지 아닌지를 알아야 한다. code를 이용해 쿼리하기.
     @Query("SELECT EXISTS (select * from pharm where code = :code) result")

@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.RoomDatabase;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.R;
@@ -31,6 +33,7 @@ public class FavoriteFragment extends Fragment {
     private ProgressBar progressBar;
     private AppDatabase db;
     private RecyclerView recyclerView;
+    private RequestQueue requestQueue;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class FavoriteFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         AppDatabase.destroyInstance();
+        requestQueue = null;
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -49,18 +53,21 @@ public class FavoriteFragment extends Fragment {
 
         favoriteViewModel =
                 new ViewModelProvider(this).get(FavoriteViewModel.class);
+        favoriteViewModel.setQue(requestQueue, getString(R.string.MASK_URL));
         favoriteViewModel.fetchByRoom(db);                               //이렇게 db 객체를 넘겨줘도 괜찮을까? viewModel에서는 지역변수로만 쓰게 하면 괜찮지 않을까?
+        requestQueue = Volley.newRequestQueue(getContext());
+
         View root = inflater.inflate(R.layout.fragment_favorite, container, false);
         final TextView textView = root.findViewById(R.id.text_no_favorite);
         recyclerView = root.findViewById(R.id.favorite_recyclerview);
 
         progressBar = root.findViewById(R.id.favorite_progressBar);
 
-        favoriteViewModel.getStores().observe(getViewLifecycleOwner(), (stores -> {
+        favoriteViewModel.getPharms().observe(getViewLifecycleOwner(), (pharms -> {
             //store값 변화시 UI 업데이트
-            if(stores == null){      //초기 로딩 시
+            if(pharms == null){      //초기 로딩 시
                 progressBar.setVisibility(View.VISIBLE);
-            }else if(stores.size() == 0){                   //즐겨찾기 한 약국이 없을 시
+            }else if(pharms.size() == 0){                   //즐겨찾기 한 약국이 없을 시
                 textView.setText(getString(R.string.favorite_no_stores));
                 progressBar.setVisibility(View.GONE);
             }else {                                      //즐겨찾기 한 약국 표시해주기
@@ -68,7 +75,7 @@ public class FavoriteFragment extends Fragment {
                 manager.setOrientation(RecyclerView.VERTICAL);
                 recyclerView.setLayoutManager(manager);
                 FavoriteAdapter adapter = new FavoriteAdapter();
-                adapter.pharms = stores;
+                adapter.pharms = pharms;
                 recyclerView.setAdapter(adapter);
                 progressBar.setVisibility(View.INVISIBLE);
             }
@@ -92,15 +99,15 @@ public class FavoriteFragment extends Fragment {
             private MaterialButton addToFavoriteButton;
             FavoriteViewHolder(@NonNull View itemView) {
                 super(itemView);
-                stockStatus = itemView.findViewById(R.id.bottom_sheet_stock_status);
-                statusView = itemView.findViewById(R.id.bottom_sheet_status_view);
-                updateIcon = itemView.findViewById(R.id.bottom_sheet_update_icon);
-                receiveIcon = itemView.findViewById(R.id.bottom_sheet_receive_icon);
-                storeName = itemView.findViewById(R.id.bottom_sheet_store_name);
-                updateTime = itemView.findViewById(R.id.bottom_sheet_update_time);
-                receiveTime = itemView.findViewById(R.id.bottom_sheet_receive_time);
-                address = itemView.findViewById(R.id.bottom_sheet_address);
-                addToFavoriteButton = itemView.findViewById(R.id.bottom_sheet_button_add_favorite);
+                stockStatus = itemView.findViewById(R.id.favorite_stock_status);
+                statusView = itemView.findViewById(R.id.favorite_status_view);
+                updateIcon = itemView.findViewById(R.id.favorite_update_icon);
+                receiveIcon = itemView.findViewById(R.id.favorite_receive_icon);
+                storeName = itemView.findViewById(R.id.favorite_store_name);
+                updateTime = itemView.findViewById(R.id.favorite_update_time);
+                receiveTime = itemView.findViewById(R.id.favorite_receive_time);
+                address = itemView.findViewById(R.id.favorite_address);
+                addToFavoriteButton = itemView.findViewById(R.id.favorite_delete_button);
                 //addToFavoriteButton.setOnClickListener(this);
             }
         }
@@ -108,7 +115,7 @@ public class FavoriteFragment extends Fragment {
         @NonNull
         @Override
         public FavoriteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.bottom_sheet_info_view, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.favorite_info_view, parent, false);
             return new FavoriteViewHolder(view);
         }
 
@@ -159,6 +166,7 @@ public class FavoriteFragment extends Fragment {
             holder.address.setText(addr);
 
             holder.addToFavoriteButton.setIconTintResource(color);
+            holder.addToFavoriteButton.setTextColor(newColor);
         }
 
         @Override

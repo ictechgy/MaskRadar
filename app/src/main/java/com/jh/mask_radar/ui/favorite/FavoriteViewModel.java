@@ -8,35 +8,110 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.room.RoomDatabase;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.jh.mask_radar.db.AppDatabase;
 import com.jh.mask_radar.db.Pharm;
 import com.jh.mask_radar.model.Store;
+import com.naver.maps.geometry.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FavoriteViewModel extends ViewModel {
 
-    private MutableLiveData<List<Pharm>> stores;
+    private MutableLiveData<List<Pharm>> pharms;
     private Handler handler;
+    private RequestQueue requestQueue;
+    private String MASK_URL;
 
 
     public FavoriteViewModel() {
         handler = new Handler();
-        stores = new MutableLiveData<>();
-        stores.setValue(null);                  //초기 값 null로
+        pharms = new MutableLiveData<>();
+        pharms.setValue(null);                  //초기 값 null로
     }
 
-    LiveData<List<Pharm>> getStores(){ return stores; }
+    void setQue(RequestQueue requestQueue, String url){
+        this.requestQueue = requestQueue;
+        MASK_URL = url;
+    }
+
+    LiveData<List<Pharm>> getPharms(){ return pharms; }
 
     void fetchByRoom(AppDatabase db){        //Room을 통해 데이터베이스에서 즐겨찾기 항목 가져오기
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(()->{
-            LiveData<List<Pharm>> pharms = db.pharmDao().getAll();      //값을 가져온 뒤 한번 값을 업데이트 하고 넘겨주자.
-            //널값이 넘어오고 있다.. 
-            handler.post(()-> stores.setValue(pharms.getValue()));
+            List<Pharm> fetchedPharms = db.pharmDao().getAll();      //값을 가져온 뒤 한번 값을 업데이트 하고 넘겨주자.
+            if(fetchedPharms.size() != 0){
+                for(Pharm pharm : fetchedPharms)
+                    updatePharms(pharm);
+            }
+
+            handler.post(()-> pharms.setValue(fetchedPharms));
         });
+    }
+
+    void updatePharms(Pharm pharm){      //마스크 정보 업데이트 - fetch 방식은 Store, 저장방식은 Pharm이어서 굉장히 불편함...
+        final LatLng coord = new LatLng(pharm.lat, pharm.lng);
+        final double radius = 0;
+        StringBuilder builder = new StringBuilder();
+        builder.append(MASK_URL)
+                .append("lat=").append(coord.latitude).append("&lng=").append(coord.longitude).append("&m=").append((int) radius);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, builder.toString(), null ,
+                response -> {
+                    try{
+                        JSONArray jsonArray= response.getJSONArray("stores");
+                        ArrayList<Store> list = new ArrayList<>();
+                        for(int i=0; i<jsonArray.length(); i++){
+                            Store store = parseStoreJson(jsonArray.getJSONObject(i));
+                            store.setIndex(i);
+                            list.add(store);
+                        }
+                        stores.setValue(new ArrayList<>(list));
+                    }catch (JSONException e){
+                        //Store 정보를 파싱하던 중 오류가 발생한 경우에 대한 상세한 처리 필요.
+                        e.printStackTrace();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("volley error", error.getMessage());      //이쪽도 마찬가지로 상세한 처리가 필요하다.
+                    }
+                });
+
+        requestQueue.add(request);  //통신 시작.
+    }
+
+    private Store parseStoreJson (JSONObject jsonObject) throws JSONException{      //데이터 파싱메소드
+        Store store = new Store();
+
+        store.setCode(jsonObject.getString("code"));
+
+        String createdAt = jsonObject.optString("created_at", "알 수 없음");
+        store.setCreated_at((createdAt == null || createdAt.equals("null")? "알 수 없음" : createdAt));
+        String stockAt = jsonObject.optString("stock_at", "알 수 없음");
+        store.setStock_at((stockAt == null || stockAt.equals("null"))? "알 수 없음" : stockAt);     //요건 이제 없어도 되지 않을까..?
+
+        store.setRemain_stat(jsonObject.optString("remain_stat", "알 수 없음"));
+        store.setAddr(jsonObject.getString("addr"));
+        store.setLat((float)jsonObject.getDouble("lat"));
+        store.setLng((float)jsonObject.getDouble("lng"));
+        store.setName(jsonObject.getString("name"));
+        store.setType(jsonObject.getString("type"));
+
+        return store;
     }
 
 
