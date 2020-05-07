@@ -24,6 +24,9 @@ public interface PharmDao {
     @Update
     int updatePharms(Pharm ...pharms);        //즐겨찾기 항목에 대한 새로고침 - 사용자가 새로고침을 누르고 값을 다시 받으면 해당 사항을 db에 업뎃하는 작업
 
+    @Query("UPDATE pharm SET create_at = :created_at, stock_at = :stock_at, remain_stat = :remain_stat where code = :code")
+    int updatePharmByCode(String code, String created_at, String stock_at, String remain_stat);
+
     @Delete
     int deletePharm(Pharm pharm); //특정 즐겨찾기 약국 삭제
     @Query("delete from pharm where code = :code")

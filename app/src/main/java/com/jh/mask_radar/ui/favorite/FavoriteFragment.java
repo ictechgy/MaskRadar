@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,9 +54,9 @@ public class FavoriteFragment extends Fragment {
 
         favoriteViewModel =
                 new ViewModelProvider(this).get(FavoriteViewModel.class);
+        requestQueue = Volley.newRequestQueue(getContext());
         favoriteViewModel.setQue(requestQueue, getString(R.string.MASK_URL));
         favoriteViewModel.fetchByRoom(db);                               //이렇게 db 객체를 넘겨줘도 괜찮을까? viewModel에서는 지역변수로만 쓰게 하면 괜찮지 않을까?
-        requestQueue = Volley.newRequestQueue(getContext());
 
         View root = inflater.inflate(R.layout.fragment_favorite, container, false);
         final TextView textView = root.findViewById(R.id.text_no_favorite);
@@ -78,6 +79,7 @@ public class FavoriteFragment extends Fragment {
                 adapter.pharms = pharms;
                 recyclerView.setAdapter(adapter);
                 progressBar.setVisibility(View.INVISIBLE);
+                Toast.makeText(getContext(), "업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
             }
         }));
 
