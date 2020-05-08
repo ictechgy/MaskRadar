@@ -25,6 +25,10 @@ android {
         targetCompatibility = 1.8
     }
 
+    dataBinding {
+        enabled = true
+    }
+
 }
 
 dependencies {
@@ -49,4 +53,6 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 }

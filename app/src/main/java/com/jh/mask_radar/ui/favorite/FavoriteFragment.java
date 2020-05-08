@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.RoomDatabase;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -28,13 +29,14 @@ import com.jh.mask_radar.db.Pharm;
 
 import java.util.List;
 
-public class FavoriteFragment extends Fragment {
+public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private FavoriteViewModel favoriteViewModel;
     private ProgressBar progressBar;
     private AppDatabase db;
     private RecyclerView recyclerView;
     private RequestQueue requestQueue;
+    private SwipeRefreshLayout refreshLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,10 +82,21 @@ public class FavoriteFragment extends Fragment {
                 recyclerView.setAdapter(adapter);
                 progressBar.setVisibility(View.INVISIBLE);
                 Toast.makeText(getContext(), "업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
+                refreshLayout.setEnabled(true);
             }
         }));
 
+        refreshLayout = root.findViewById(R.id.favorite_swipe_refresh_layout);
+        refreshLayout.setOnRefreshListener(this);
+        refreshLayout.setEnabled(false);
+
         return root;
+    }
+
+    @Override
+    public void onRefresh() {
+        favoriteViewModel.refreshList(db);        //do real update in viewModel
+        refreshLayout.setRefreshing(false);
     }
 
     private class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>{

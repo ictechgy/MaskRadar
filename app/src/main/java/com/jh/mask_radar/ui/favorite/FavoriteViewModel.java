@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -120,4 +121,14 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
             db.pharmDao().updatePharmByCode(pharm.code, pharm.createdAt, pharm.stockAt, pharm.remainStat);
         }
     }
+
+    void refreshList(AppDatabase db){
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.execute(()->{
+            updatePharms();
+            updatePharmsToDB(db);
+            handler.post(()-> pharms.setValue(fetchedPharms));
+        });
+    }
+
 }
