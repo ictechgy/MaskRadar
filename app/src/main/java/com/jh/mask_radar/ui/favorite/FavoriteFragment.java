@@ -29,7 +29,7 @@ import com.jh.mask_radar.db.Pharm;
 
 import java.util.List;
 
-public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private FavoriteViewModel favoriteViewModel;
     private ProgressBar progressBar;
@@ -37,6 +37,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     private RecyclerView recyclerView;
     private RequestQueue requestQueue;
     private SwipeRefreshLayout refreshLayout;
+    private FavoriteDeleteOnClickListener deleteOnClickListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,6 +90,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         refreshLayout = root.findViewById(R.id.favorite_swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setEnabled(false);
+        deleteOnClickListener = new FavoriteDeleteOnClickListener();
 
         return root;
     }
@@ -111,7 +113,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             private MaterialTextView updateTime;
             private MaterialTextView receiveTime;
             private MaterialTextView address;
-            private MaterialButton addToFavoriteButton;
+            private MaterialButton deleteButton;
             FavoriteViewHolder(@NonNull View itemView) {
                 super(itemView);
                 stockStatus = itemView.findViewById(R.id.favorite_stock_status);
@@ -122,8 +124,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 updateTime = itemView.findViewById(R.id.favorite_update_time);
                 receiveTime = itemView.findViewById(R.id.favorite_receive_time);
                 address = itemView.findViewById(R.id.favorite_address);
-                addToFavoriteButton = itemView.findViewById(R.id.favorite_delete_button);
-                //addToFavoriteButton.setOnClickListener(this);
+                deleteButton = itemView.findViewById(R.id.favorite_delete_button);
             }
         }
 
@@ -180,8 +181,10 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
             holder.address.setText(addr);
 
-            holder.addToFavoriteButton.setIconTintResource(color);
-            holder.addToFavoriteButton.setTextColor(newColor);
+            holder.deleteButton.setIconTintResource(color);
+            holder.deleteButton.setTextColor(newColor);
+
+            holder.deleteButton.setOnClickListener(deleteOnClickListener);
         }
 
         @Override
@@ -189,6 +192,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             return pharms.size();
         }
     }
+
 }
 
 //추가해야하는 기능. 즐겨찾기 화면 완성 및 업데이트 기능, 알람기능은 서버구축 필요
