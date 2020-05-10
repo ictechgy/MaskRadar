@@ -33,13 +33,13 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
     private RequestQueue requestQueue;
     private String MASK_URL;
     private List<Pharm> fetchedPharms;
-
-
+    private ExecutorService executorService;
 
     public FavoriteViewModel() {
         handler = new Handler();
         pharms = new MutableLiveData<>();
         pharms.setValue(null);                  //초기 값 null로
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     void setQue(RequestQueue requestQueue, String url){
@@ -50,7 +50,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
     LiveData<List<Pharm>> getPharms(){ return pharms; }
 
     void fetchByRoom(AppDatabase db){        //Room을 통해 데이터베이스에서 즐겨찾기 항목 가져오기
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        if(executorService == null || executorService.isShutdown() || executorService.isTerminated() )executorService = Executors.newSingleThreadExecutor();
         executorService.execute(()->{
             fetchedPharms = db.pharmDao().getAll();      //값을 가져온 뒤 한번 값을 업데이트 하고 넘겨주자.
             if(fetchedPharms.size() != 0){
@@ -123,12 +123,31 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
     }
 
     void refreshList(AppDatabase db){
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        service.execute(()->{
+        if(executorService == null || executorService.isShutdown() || executorService.isTerminated() )executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(()->{
             updatePharms();
             updatePharmsToDB(db);
             handler.post(()-> pharms.setValue(fetchedPharms));
         });
+    }
+
+    void deletePharm(AppDatabase db, int position){
+        //사용자가 클릭한 약국을 목록에서 삭제하기
+        //int id = fetchedPharms.get(position).id;    //code를 기반으로 삭제해도 됨. pharms에서 얻으나 fetchedPharms에서 얻으나 가져오는 것은 동일
+        Pharm pharm = fetchedPharms.get(position);
+        if(executorService == null || executorService.isShutdown() || executorService.isTerminated() )executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(()->{
+            db.pharmDao().deletePharm(pharm);       //id나 code 기반으로 삭제하려다가 존재하는 메소드 활용
+            fetchedPharms.remove(position);
+            handler.post(()-> pharms.setValue(fetchedPharms));
+        });
+    }
+
+    void destroyThread(){
+        if(executorService!=null){
+            executorService.shutdownNow();
+            executorService = null;
+        }
     }
 
 }

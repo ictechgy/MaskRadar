@@ -29,7 +29,7 @@ import com.jh.mask_radar.db.Pharm;
 
 import java.util.List;
 
-public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, MaterialButton.OnClickListener{
 
     private FavoriteViewModel favoriteViewModel;
     private ProgressBar progressBar;
@@ -37,7 +37,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     private RecyclerView recyclerView;
     private RequestQueue requestQueue;
     private SwipeRefreshLayout refreshLayout;
-    private FavoriteDeleteOnClickListener deleteOnClickListener;
+    private FavoriteAdapter adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +50,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         super.onDestroy();
         AppDatabase.destroyInstance();
         requestQueue = null;
+        favoriteViewModel.destroyThread();
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -78,7 +79,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 LinearLayoutManager manager = new LinearLayoutManager(getContext());
                 manager.setOrientation(RecyclerView.VERTICAL);
                 recyclerView.setLayoutManager(manager);
-                FavoriteAdapter adapter = new FavoriteAdapter();
+                adapter = new FavoriteAdapter();
                 adapter.pharms = pharms;
                 recyclerView.setAdapter(adapter);
                 progressBar.setVisibility(View.INVISIBLE);
@@ -90,7 +91,6 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         refreshLayout = root.findViewById(R.id.favorite_swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setEnabled(false);
-        deleteOnClickListener = new FavoriteDeleteOnClickListener();
 
         return root;
     }
@@ -184,13 +184,24 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             holder.deleteButton.setIconTintResource(color);
             holder.deleteButton.setTextColor(newColor);
 
-            holder.deleteButton.setOnClickListener(deleteOnClickListener);
+            holder.deleteButton.setOnClickListener(FavoriteFragment.this);
         }
 
         @Override
         public int getItemCount() {
             return pharms.size();
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        RecyclerView.ViewHolder holder = recyclerView.findContainingViewHolder(v);
+        if(holder==null) {
+            Toast.makeText(getContext(), "삭제 처리에 실패하였습니다.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int posistion = holder.getAdapterPosition();
+        favoriteViewModel.deletePharm(db, posistion);
     }
 
 }
