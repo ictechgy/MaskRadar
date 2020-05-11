@@ -72,9 +72,13 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             //store값 변화시 UI 업데이트
             if(pharms == null){      //초기 로딩 시
                 progressBar.setVisibility(View.VISIBLE);
+                refreshLayout.setEnabled(false);
             }else if(pharms.size() == 0){                   //즐겨찾기 한 약국이 없을 시
                 textView.setText(getString(R.string.favorite_no_stores));
                 progressBar.setVisibility(View.GONE);
+                //즐겨찾기를 모두 삭제시킨 경우 이 부분이 나중에 작동될 수도 있다.
+                refreshLayout.setEnabled(false);
+                recyclerView.setVisibility(View.INVISIBLE);
             }else {                                      //즐겨찾기 한 약국 표시해주기
                 LinearLayoutManager manager = new LinearLayoutManager(getContext());
                 manager.setOrientation(RecyclerView.VERTICAL);
@@ -90,7 +94,6 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         refreshLayout = root.findViewById(R.id.favorite_swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(this);
-        refreshLayout.setEnabled(false);
 
         return root;
     }
@@ -99,6 +102,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onRefresh() {
         favoriteViewModel.refreshList(db);        //do real update in viewModel
         refreshLayout.setRefreshing(false);
+        
     }
 
     private class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>{

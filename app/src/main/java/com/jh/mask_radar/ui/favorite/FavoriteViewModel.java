@@ -142,6 +142,9 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
             handler.post(()-> pharms.setValue(fetchedPharms));
         });
     }
+    //현재 해결해야 하는 문제 - 모든 즐겨찾기 삭제시 마지막 목록이 화면에서 사라지지 않으며 해당 삭제버튼 클릭 시 시스템 뻑감.    -> 해결
+    //그리고.. 업데이트에 대한 딜레이도 좀 주면 좋을 것 같고. -> SharedPref도 가능하고 여러 방법이 있음
+    //목록 업데이트에 대한 버튼을 위의 AppBar에 띄워지게 하면 좋을 듯. (FavoriteFragment에서)
 
     void destroyThread(){
         if(executorService!=null){
