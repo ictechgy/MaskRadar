@@ -67,7 +67,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
     void updatePharms(){      //마스크 정보 업데이트
         for(Pharm pharm : fetchedPharms){
             final LatLng coord = new LatLng(pharm.lat, pharm.lng);
-            final double radius = 0;
+            final double radius = 1;            //radius를 0으로 두면 못가져온다..
             StringBuilder builder = new StringBuilder();
             builder.append(MASK_URL)
                     .append("lat=").append(coord.latitude).append("&lng=").append(coord.longitude).append("&m=").append((int) radius);
@@ -75,6 +75,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
                     response -> {
                         try{
                             JSONArray jsonArray= response.getJSONArray("stores");
+                            //Log.e("json 확인", jsonArray.toString());
                             parsePharmJson(jsonArray.getJSONObject(0), pharm);
 
                         }catch (JSONException e){
@@ -143,8 +144,8 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
         });
     }
     //현재 해결해야 하는 문제 - 모든 즐겨찾기 삭제시 마지막 목록이 화면에서 사라지지 않으며 해당 삭제버튼 클릭 시 시스템 뻑감.    -> 해결
-    //그리고.. 업데이트에 대한 딜레이도 좀 주면 좋을 것 같고. -> SharedPref도 가능하고 여러 방법이 있음
-    //목록 업데이트에 대한 버튼을 위의 AppBar에 띄워지게 하면 좋을 듯. (FavoriteFragment에서)
+    //그리고.. 업데이트에 대한 딜레이도 좀 주면 좋을 것 같고. -> SharedPref도 가능하고 여러 방법이 있음   ->해결
+    //목록 업데이트에 대한 버튼을 위의 AppBar에 띄워지게 하면 좋을 듯. (FavoriteFragment에서) -> 만듬
 
     void destroyThread(){
         if(executorService!=null){

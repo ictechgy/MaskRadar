@@ -1,7 +1,12 @@
 package com.jh.mask_radar.ui.favorite;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -11,12 +16,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.RoomDatabase;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.RequestQueue;
@@ -38,6 +40,8 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     private RequestQueue requestQueue;
     private SwipeRefreshLayout refreshLayout;
     private FavoriteAdapter adapter;
+    private boolean shoudWait;
+    private BlockUpdateTimer timer;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,11 +55,12 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         AppDatabase.destroyInstance();
         requestQueue = null;
         favoriteViewModel.destroyThread();
+        timer.cancel();
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
+        setHasOptionsMenu(true);
         favoriteViewModel =
                 new ViewModelProvider(this).get(FavoriteViewModel.class);
         requestQueue = Volley.newRequestQueue(getContext());
@@ -89,21 +94,56 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 progressBar.setVisibility(View.INVISIBLE);
                 Toast.makeText(getContext(), "업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
                 refreshLayout.setEnabled(true);
+                refreshLayout.setRefreshing(false);
+                shoudWait = true;
+                timer.start();
             }
         }));
 
         refreshLayout = root.findViewById(R.id.favorite_swipe_refresh_layout);
         refreshLayout.setOnRefreshListener(this);
 
+        timer = new BlockUpdateTimer(30000, 30000); //onTick은 쓰지 않을 것이므로 두번째 인자는 첫번째와 동일하게 줌.
+
         return root;
     }
 
+
+
     @Override
     public void onRefresh() {
+        if(shoudWait){
+            Toast.makeText(getContext(), getString(R.string.block_update), Toast.LENGTH_LONG).show();
+            refreshLayout.setRefreshing(false);
+            return;
+        }
+        refreshLayout.setRefreshing(true);
         favoriteViewModel.refreshList(db);        //do real update in viewModel
         refreshLayout.setRefreshing(false);
-        
     }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.favorite_update_menu, menu);
+        //Drawable icon = menu.getItem(0).getIcon();
+        //icon.setColorFilter(getResources().getColor(R.color.colorNoSale, null), PorterDuff.Mode.SRC_ATOP);
+    }
+
+    /*
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.favorite_update_menu_icon:
+                if(!refreshLayout.isEnabled()){
+                    Toast.makeText(getContext(), getString(R.string.favorite_update_menu_icon_alert), Toast.LENGTH_SHORT).show();
+                }else onRefresh();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    이건 여기서 하는게 아닌듯.
+     */
 
     private class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>{
         private List<Pharm> pharms;
@@ -175,6 +215,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
 
             holder.updateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
             holder.receiveIcon.getCompoundDrawables()[0].setTint(newColor);
+            //현재 모든 즐겨찾기 아이콘 색이 동일함. 수정 필요...갑자기 왜..
 
             holder.storeName.setText(pharm.name);
             holder.updateTime.setText(pharm.createdAt);
@@ -206,6 +247,23 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
         int posistion = holder.getAdapterPosition();
         favoriteViewModel.deletePharm(db, posistion);
+    }
+
+    private class BlockUpdateTimer extends CountDownTimer{
+
+        BlockUpdateTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            //nothing to do
+        }
+
+        @Override
+        public void onFinish() {
+            shoudWait = false;
+        }
     }
 
 }
