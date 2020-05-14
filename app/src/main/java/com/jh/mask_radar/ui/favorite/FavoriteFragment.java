@@ -11,8 +11,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,6 +32,7 @@ import com.jh.mask_radar.db.AppDatabase;
 import com.jh.mask_radar.db.Pharm;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, MaterialButton.OnClickListener{
 
@@ -44,28 +48,18 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = AppDatabase.getInstance(getContext());
-    }
+        favoriteViewModel =
+                new ViewModelProvider(this).get(FavoriteViewModel.class);
+        requestQueue = Volley.newRequestQueue(requireContext());
+        favoriteViewModel.setQue(requestQueue, getString(R.string.MASK_URL));   //http요청을 위한 Volley Que를 Viewmodel로 넘김
+        favoriteViewModel.fetchByRoom(db);                               //이렇게 db 객체를 넘겨줘도 괜찮을까? viewModel에서는 지역변수로만 쓰게 하면 괜찮지 않을까?
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        AppDatabase.destroyInstance();
-        requestQueue = null;
-        favoriteViewModel.destroyThread();
-        timer.cancel();
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         favoriteBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_favorite, container, false);
-        setHasOptionsMenu(true);
-        favoriteViewModel =
-                new ViewModelProvider(this).get(FavoriteViewModel.class);
-        requestQueue = Volley.newRequestQueue(getContext());
-        favoriteViewModel.setQue(requestQueue, getString(R.string.MASK_URL));
-        favoriteViewModel.fetchByRoom(db);                               //이렇게 db 객체를 넘겨줘도 괜찮을까? viewModel에서는 지역변수로만 쓰게 하면 괜찮지 않을까?
-        favoriteBinding.setFavoriteViewModel(favoriteViewModel);
-        
+        setHasOptionsMenu(true);       //Refresh Layout과는 별개의 업데이트 버튼
 
         favoriteViewModel.getPharms().observe(getViewLifecycleOwner(), (pharms -> {
             //store값 변화시 UI 업데이트
@@ -94,14 +88,17 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         }));
 
-        favoriteBinding.favoriteSwipeRefreshLayout.setOnRefreshListener(this);
-
-        timer = new BlockUpdateTimer(30000, 30000); //onTick은 쓰지 않을 것이므로 두번째 인자는 첫번째와 동일하게 줌.
-
         return favoriteBinding.getRoot();
     }
 
-
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        favoriteBinding.favoriteSwipeRefreshLayout.setOnRefreshListener(this);
+        favoriteBinding.setLifecycleOwner(this);
+        favoriteBinding.setFavoriteViewModel(favoriteViewModel);    //데이터 바인딩용
+        timer = new BlockUpdateTimer(30000, 30000); //onTick은 쓰지 않을 것이므로 두번째 인자는 첫번째와 동일하게 줌.
+    }
 
     @Override
     public void onRefresh() {
@@ -158,6 +155,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         @Override
         public void onBindViewHolder(@NonNull FavoriteViewHolder holder, int position) {
             Pharm pharm = pharms.get(holder.getAdapterPosition());
+            holder.infoViewBinding.setPharm(pharm);
 
             String status;
             int color;
@@ -184,28 +182,28 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                     break;
             }
 
-            holder.stockStatus.setText(status);
+            //holder.stockStatus.setText(status);
             int newColor = getContext().getResources().getColor(color, null);
-            holder.statusView.setBackgroundColor(newColor);
-            holder.stockStatus.setTextColor(newColor);
+            holder.infoViewBinding.favoriteStatusView.setBackgroundColor(newColor);
+            holder.infoViewBinding.favoriteStockStatus.setTextColor(newColor);
 
-            holder.updateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
-            holder.receiveIcon.getCompoundDrawables()[0].setTint(newColor);
+            holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
+            holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawables()[0].setTint(newColor);
             //현재 모든 즐겨찾기 아이콘 색이 동일함. 수정 필요...갑자기 왜..
 
-            holder.storeName.setText(pharm.name);
-            holder.updateTime.setText(pharm.createdAt);
-            holder.receiveTime.setText(pharm.stockAt);
+            //holder.storeName.setText(pharm.name);
+            //holder.updateTime.setText(pharm.createdAt);
+            //holder.receiveTime.setText(pharm.stockAt);
 
             String addr = pharm.addr;
             int idx = addr.indexOf("(");
             if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
-            holder.address.setText(addr);
+            //holder.address.setText(addr);
 
-            holder.deleteButton.setIconTintResource(color);
-            holder.deleteButton.setTextColor(newColor);
+            holder.infoViewBinding.favoriteDeleteButton.setIconTintResource(color);
+            holder.infoViewBinding.favoriteDeleteButton.setTextColor(newColor);
 
-            holder.deleteButton.setOnClickListener(FavoriteFragment.this);
+            holder.infoViewBinding.favoriteDeleteButton.setOnClickListener(FavoriteFragment.this);
         }
 
         @Override
@@ -240,6 +238,23 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         public void onFinish() {
             shoudWait = false;
         }
+    }
+
+    @BindingAdapter("bind:item")
+    public static void bindItem(RecyclerView recyclerView, LiveData<List<Pharm>> pharms){
+        FavoriteAdapter adapter = (FavoriteAdapter)recyclerView.getAdapter();
+        if(adapter!=null){
+            adapter.pharms = pharms.getValue();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        AppDatabase.destroyInstance();
+        requestQueue = null;
+        favoriteViewModel.destroyThread();
+        timer.cancel();
     }
 
 }

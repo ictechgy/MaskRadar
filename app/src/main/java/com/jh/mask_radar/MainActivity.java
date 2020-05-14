@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
         NavigationUI.setupWithNavController(navigationView, navController);
 
 
-        NaverMapSdk.getInstance(this).setClient(new NaverMapSdk.NaverCloudPlatformClient(getString(R.string.API_KEY)));
+        //NaverMapSdk.getInstance(this).setClient(new NaverMapSdk.NaverCloudPlatformClient(getString(R.string.API_KEY))); --> deprecated
         //navViewHeight = navView.getHeight();  이 방식으로 측정시 0값 측정됨.
         //navView.post(()-> navViewHeight = navView.getMeasuredHeight());
 

@@ -3,6 +3,7 @@ package com.jh.mask_radar.ui.favorite;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -47,7 +48,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
         MASK_URL = url;
     }
 
-    LiveData<List<Pharm>> getPharms(){ return pharms; }
+    public LiveData<List<Pharm>> getPharms(){ return pharms; }
 
     void fetchByRoom(AppDatabase db){        //Room을 통해 데이터베이스에서 즐겨찾기 항목 가져오기
         if(executorService == null || executorService.isShutdown() || executorService.isTerminated() )executorService = Executors.newSingleThreadExecutor();

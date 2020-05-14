@@ -13,6 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_radar_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="${naverMapApiKey}" />
         <activity
             android:name="com.jh.mask_radar.MainActivity"
             android:label="@string/app_name">
