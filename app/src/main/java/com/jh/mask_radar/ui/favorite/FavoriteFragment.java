@@ -15,7 +15,6 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +23,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.R;
 import com.jh.mask_radar.databinding.FavoriteInfoViewBinding;
 import com.jh.mask_radar.databinding.FragmentFavoriteBinding;
@@ -32,7 +30,6 @@ import com.jh.mask_radar.db.AppDatabase;
 import com.jh.mask_radar.db.Pharm;
 
 import java.util.List;
-import java.util.Objects;
 
 public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, MaterialButton.OnClickListener{
 
@@ -183,13 +180,15 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
 
             //holder.stockStatus.setText(status);
-            int newColor = getContext().getResources().getColor(color, null);
+            holder.infoViewBinding.favoriteStockStatus.setText(status);
+            int newColor = requireContext().getResources().getColor(color, null);
             holder.infoViewBinding.favoriteStatusView.setBackgroundColor(newColor);
             holder.infoViewBinding.favoriteStockStatus.setTextColor(newColor);
 
             holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
             holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawables()[0].setTint(newColor);
             //현재 모든 즐겨찾기 아이콘 색이 동일함. 수정 필요...갑자기 왜..
+
 
             //holder.storeName.setText(pharm.name);
             //holder.updateTime.setText(pharm.createdAt);
@@ -199,6 +198,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             int idx = addr.indexOf("(");
             if(idx != -1) addr = addr.substring(0, idx);    //주소부분에서 괄호 설명부분은 생략
             //holder.address.setText(addr);
+            holder.infoViewBinding.favoriteAddress.setText(addr);
 
             holder.infoViewBinding.favoriteDeleteButton.setIconTintResource(color);
             holder.infoViewBinding.favoriteDeleteButton.setTextColor(newColor);

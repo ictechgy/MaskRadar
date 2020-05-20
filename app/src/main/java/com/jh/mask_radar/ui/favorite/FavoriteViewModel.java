@@ -47,7 +47,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
         this.requestQueue = requestQueue;
         MASK_URL = url;
     }
-
+    public void setPharms(List<Pharm> pharms){ this.pharms.setValue(pharms);}
     public LiveData<List<Pharm>> getPharms(){ return pharms; }
 
     void fetchByRoom(AppDatabase db){        //Room을 통해 데이터베이스에서 즐겨찾기 항목 가져오기
@@ -65,7 +65,7 @@ public class FavoriteViewModel extends ViewModel implements Response.ErrorListen
         });
     }
 
-    void updatePharms(){      //마스크 정보 업데이트
+    private void updatePharms(){      //마스크 정보 업데이트
         for(Pharm pharm : fetchedPharms){
             final LatLng coord = new LatLng(pharm.lat, pharm.lng);
             final double radius = 1;            //radius를 0으로 두면 못가져온다..
