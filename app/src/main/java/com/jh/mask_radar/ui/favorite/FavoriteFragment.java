@@ -1,5 +1,7 @@
 package com.jh.mask_radar.ui.favorite;
 
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -185,9 +188,12 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             holder.infoViewBinding.favoriteStatusView.setBackgroundColor(newColor);
             holder.infoViewBinding.favoriteStockStatus.setTextColor(newColor);
 
-            holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
-            holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawables()[0].setTint(newColor);
+            //holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
+            //holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawables()[0].setTint(newColor);
             //현재 모든 즐겨찾기 아이콘 색이 동일함. 수정 필요...갑자기 왜..
+            //DrawableLeft -> DrawableStart로 변경 뒤 오류 발생중!!!
+            holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
+            holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
 
 
             //holder.storeName.setText(pharm.name);
