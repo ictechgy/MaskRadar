@@ -6,6 +6,9 @@
         <variable
             name="pharm"
             type="com.jh.mask_radar.db.Pharm" />
+        <variable
+            name="color"
+            type="int" />
     </data>
     <LinearLayout
 
@@ -64,11 +67,9 @@
                             android:layout_weight="2"
                             app:icon="@drawable/ic_delete_24px"
                             app:iconGravity="start"
-                            app:iconTint="@color/colorFew"
                             android:gravity="center"
                             android:backgroundTint="#FFFFFF"
                             android:shadowColor="#FFFFFF"
-                            android:textColor="@color/colorFew"
                             android:text="@string/favorite_delete"
                             style="?android:attr/borderlessButtonStyle"
                             />
@@ -111,6 +112,7 @@
                             android:layout_height="match_parent"
                             android:text="@string/update"
                             android:drawableStart="@drawable/ic_update_24px"
+                            app:drawableTint="@{color}"
                             />
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_marginStart="10dp"
@@ -136,6 +138,7 @@
                             android:layout_height="match_parent"
                             android:text="@string/receive"
                             android:drawableStart="@drawable/ic_move_to_inbox_24px"
+                            app:drawableTint="@{color}"
                             />
                         <com.google.android.material.textview.MaterialTextView
                             android:layout_marginStart="10dp"

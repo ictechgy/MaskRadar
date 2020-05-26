@@ -1,9 +1,12 @@
 package com.jh.mask_radar.ui.favorite;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,6 +29,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.R;
 import com.jh.mask_radar.databinding.FavoriteInfoViewBinding;
 import com.jh.mask_radar.databinding.FragmentFavoriteBinding;
@@ -188,13 +192,15 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
             holder.infoViewBinding.favoriteStatusView.setBackgroundColor(newColor);
             holder.infoViewBinding.favoriteStockStatus.setTextColor(newColor);
 
+            holder.infoViewBinding.setColor(newColor);
+
+
             //holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawables()[0].setTint(newColor);     //0 means left compound drawable icon
             //holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawables()[0].setTint(newColor);
             //현재 모든 즐겨찾기 아이콘 색이 동일함. 수정 필요...갑자기 왜..
-            //DrawableLeft -> DrawableStart로 변경 뒤 오류 발생중!!!
-            holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
-            holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
-
+            //DrawableLeft -> DrawableStart로 변경 뒤 오류 발생중!!! - 해결
+            //holder.infoViewBinding.favoriteUpdateIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
+            //holder.infoViewBinding.favoriteReceiveIcon.getCompoundDrawablesRelative()[0].setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN));
 
             //holder.storeName.setText(pharm.name);
             //holder.updateTime.setText(pharm.createdAt);
@@ -263,6 +269,15 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         timer.cancel();
     }
 
+    @BindingAdapter("app:drawableTint")
+    public static void setDrawableTint(MaterialTextView v, int color){
+        //v.getCompoundDrawablesRelative()[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        Log.e("drawable 개수 확인: ", v.getCompoundDrawablesRelative().length + "");    //4개가 나온다. 즐겨찾기 화면에 뜨는 목록의 총 개수가 4개인데...
+        //에시당초 1개만 뜰 것으로 예상하고 한건데.. 즉 4개의 목록이 보이면 8개의 Log가 뜨길 바랬다. 하나의 목록당 아이콘은 2개이므로.
+        //왜 아이템 각각에 대한 호출이 되지 않는거지??
+        //v.setTextColor(color);    - 이거는 각각의 아이템에 대해 잘 설정 되는 것으로 보아.. compoundDrawable을 쓰면 안될 것 같다.
+        v.setCompoundDrawableTintList(ColorStateList.valueOf(color));       //해결 완료.
+    }
 }
 
 //추가해야하는 기능. 즐겨찾기 화면 완성 및 업데이트 기능, 알람기능은 서버구축 필요
