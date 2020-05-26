@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -122,10 +123,10 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
         //icon.setColorFilter(getResources().getColor(R.color.colorNoSale, null), PorterDuff.Mode.SRC_ATOP);
     }
 
-    /*
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        /*
         switch (id){
             case R.id.favorite_update_menu_icon:
                 if(!refreshLayout.isEnabled()){
@@ -133,10 +134,13 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 }else onRefresh();
                 return true;
         }
-        return super.onOptionsItemSelected(item);
+         */
+        if(!favoriteBinding.favoriteSwipeRefreshLayout.isEnabled()){   //업데이트 할 데이터가 없는 경우
+            Toast.makeText(getContext(), getString(R.string.favorite_update_menu_icon_alert), Toast.LENGTH_SHORT).show();
+        }else onRefresh();
+        return true;
     }
-    이건 여기서 하는게 아닌듯.
-     */
+
 
     private class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>{
         private List<Pharm> pharms;
