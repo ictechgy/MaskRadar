@@ -18,4 +18,6 @@
 
     <dimen name="nav_header_email">13sp</dimen>
 
+    <dimen name="trigger_distance">20dp</dimen>
+
 </resources>

@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +41,12 @@ import com.jh.mask_radar.db.Pharm;
 import java.util.List;
 
 public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, MaterialButton.OnClickListener{
+    //일부 기종에서 연속으로 즐겨찾기 추가시 앱 비정상종료 이슈 발생중
+    //즐겨찾기 화면에서 햄버거 메뉴바 클릭 시 업데이트 버튼하고 동일하게 동작하는 이슈 발생중 -> 해결
+    //즐겨찾기 화면 refresh layout의 민감도가 지나치게 큼   - 해결
+    //라이센스 화면의 디자인 변경 필요
+    //선택적 접근권한 부분 알림 추가 필요 - Modal Popup?
+    //Drawer Nav 중 즐겨찾기 메뉴가 잠깐잠깐 비활성화 될 때가 있음.
 
     private FragmentFavoriteBinding favoriteBinding;
     private FavoriteViewModel favoriteViewModel;
@@ -48,6 +55,9 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
     private FavoriteAdapter adapter;
     private boolean shoudWait;
     private BlockUpdateTimer timer;
+
+    private static final double MAX_SWIPE_DISTANCE_FACTOR = 0.6;    //swipe refresh layout의 기본값
+    private static final int REFRESH_TRIGGER_DISTANCE = 150;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,6 +97,11 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 favoriteBinding.favoriteProgressBar.setVisibility(View.INVISIBLE);
                 Toast.makeText(getContext(), "업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
                 favoriteBinding.favoriteSwipeRefreshLayout.setEnabled(true);
+                final DisplayMetrics metrics = getResources().getDisplayMetrics();
+                int mDistanceToTriggerSync = (int) Math.min(
+                        ((View) container.getParent()) .getHeight() * MAX_SWIPE_DISTANCE_FACTOR,
+                        REFRESH_TRIGGER_DISTANCE * metrics.density);
+                favoriteBinding.favoriteSwipeRefreshLayout.setDistanceToTriggerSync(mDistanceToTriggerSync);    //swipe 민감도 설정
                 favoriteBinding.favoriteSwipeRefreshLayout.setRefreshing(false);
                 shoudWait = true;
                 timer.start();
@@ -135,6 +150,7 @@ public class FavoriteFragment extends Fragment implements SwipeRefreshLayout.OnR
                 return true;
         }
          */
+        if(id != R.id.favorite_update_menu_icon) return super.onOptionsItemSelected(item);  //햄버거 버튼이 눌린 경우 기존의 동작 수행
         if(!favoriteBinding.favoriteSwipeRefreshLayout.isEnabled()){   //업데이트 할 데이터가 없는 경우
             Toast.makeText(getContext(), getString(R.string.favorite_update_menu_icon_alert), Toast.LENGTH_SHORT).show();
         }else onRefresh();
