@@ -28,33 +28,6 @@
 
         </com.naver.maps.map.MapView>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            >
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="5dp"
-                app:cardElevation="5dp"
-                app:cardUseCompatPadding="true"
-                app:contentPadding="3dp"
-                android:layout_gravity="end"
-                >
-                <com.google.android.material.textview.MaterialTextView
-                    android:fontFamily="@font/hanna_11yrs"
-                    android:textSize="18sp"
-                    android:padding="2dp"
-                    android:textColor="@color/colorSecondary"
-                    android:text="임시 텍스트"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/target_button"/>
-            </com.google.android.material.card.MaterialCardView>
-        </FrameLayout>
-
         <include layout="@layout/bottom_sheet_info_view"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

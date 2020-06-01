@@ -176,6 +176,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
 
         handler = new Handler();
 
+        /*
         MaterialTextView targetTextView = root.findViewById(R.id.target_button);    //구매 대상자 알리기
         int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         //sunday=1, mon=2 .3.4.5.6. sat = 7 -> 보급패턴은 1,6 2,7 3,8 4,9 5,0
@@ -190,6 +191,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         targetTextView.setOnClickListener((v)->{
             Toast.makeText(getContext(), "오늘은"+targetText+"구매가능 날입니다.", Toast.LENGTH_LONG).show();
         });
+         */
+        //주 5일제 마스크 구입 폐지에 따른 업데이트
 
         /*
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext());
