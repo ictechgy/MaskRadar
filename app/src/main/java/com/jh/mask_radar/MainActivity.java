@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -63,9 +64,9 @@ public class MainActivity extends AppCompatActivity implements NavViewHeightRetu
 
         //navigationView에 대한 reselect 처리 필요!!!! <- 최우선 과제
         previousMenuId = -1;
+
+
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {       //해결 완료

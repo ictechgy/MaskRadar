@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_map">
+    app:startDestination="@id/navigation_map">
 
     <fragment
         android:id="@+id/navigation_map"
@@ -44,9 +44,5 @@
         android:name="com.jh.mask_radar.NoticeFragment"
         android:label="@string/notice"
         tools:layout="@layout/fragment_notice"
-        >
-        <action
-            android:id="@+id/action_navigation_notice_to_navigation_map"
-            app:destination="@id/navigation_map" />
-    </fragment>
+        />
 </navigation>

@@ -103,10 +103,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         locationSource = new FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE);
         //화면에 지도가 보이자마자 권한을 요청. 내 위치 버튼을 누른 경우에 인스턴스화 요청해도 될 것으로 보임.
         //현재 AlertDialog가 띄워져서 바로 보이지 않는 것으로 보임.
-
 
         db = AppDatabase.getInstance(getContext());
     }
@@ -266,58 +266,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+
         //사용자의 마지막 위치 가져오기
         Context context = view.getContext();
         pref = context.getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
         if(pref!=null){
 
+            boolean needNotice = pref.getBoolean("needNotice", true);
+            if(needNotice){     //권한사항 봐야 하는 경우 먼저 보기
+                NavController navController = Navigation.findNavController(requireView());
+                navController.navigate(R.id.action_navigation_map_to_navigation_notice);
+            }
+
             if(pref.contains("latitude") && pref.contains("longitude"))
                 lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
 
-            boolean needNotice = pref.getBoolean("needNotice", true);   //기본값은 true로서 notice를 보여야 함을 의미
-            if(needNotice){
-                NavController navController = Navigation.findNavController(view);
-                navController.navigate(R.id.action_navigation_map_to_navigation_notice);
-
-                //need return?
-            }
-
-
-            int storedDayOfMonth = pref.getInt("day_of_week", 0);
-            boolean isDayChanged = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) != storedDayOfMonth;
-            //날짜는 Sunday를 1로 시작하여 Saturday를 7로 끝난다.
-            //최초 로딩시에는 defValue인 0을 반환하여 무조건 Alert가 뜬다.
-
-            if(isDayChanged){   //날짜가 바뀐 경우에 Alert 띄우기
-
-                AlertDialog mainAlertDialog = new MaterialAlertDialogBuilder(context)
-                        .setTitle(R.string.main_alert_title)
-                        //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
-                        .setAdapter(new ArrayAdapter<>(context,
-                                        android.R.layout.simple_list_item_1,
-                                        Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
-                                (dialog, which) -> {})
-                        .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {
-                            if(storedDayOfMonth != 0) {
-                                SharedPreferences.Editor editor = pref.edit();
-                                editor.remove("day_of_week");
-                                editor.apply();
-                            }
-                        })
-                        .setNegativeButton(R.string.main_alert_cancel, ((dialog, which) -> {
-                            //하루동안 보지 않기 구현 코드
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.
-                            editor.apply();
-                        }))
-                        .setIcon(R.drawable.ic_warning_24px).create();
-
-                mainAlertDialog.setOnShowListener(dialog -> {
-                    mainAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorFew, null));
-                    mainAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondary, null));
-                });
-                mainAlertDialog.show();
-            }
         }
     }
 
@@ -1180,6 +1143,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     public void onResume() {
         super.onResume();
         mapView.onResume();
+
+        Context context = requireContext();
+        SharedPreferences pref = context.getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        int storedDayOfMonth = pref.getInt("day_of_week", 0);
+        boolean isDayChanged = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) != storedDayOfMonth;
+        //날짜는 Sunday를 1로 시작하여 Saturday를 7로 끝난다.
+        //최초 로딩시에는 defValue인 0을 반환하여 무조건 Alert가 뜬다.
+
+        if(isDayChanged){   //날짜가 바뀐 경우에 Alert 띄우기
+
+            AlertDialog mainAlertDialog = new MaterialAlertDialogBuilder(context)
+                    .setTitle(R.string.main_alert_title)
+                    //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
+                    .setAdapter(new ArrayAdapter<>(context,
+                                    android.R.layout.simple_list_item_1,
+                                    Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
+                            (dialog, which) -> {})
+                    .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {
+                        if(storedDayOfMonth != 0) {
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.remove("day_of_week");
+                            editor.apply();
+                        }
+                    })
+                    .setNegativeButton(R.string.main_alert_cancel, ((dialog, which) -> {
+                        //하루동안 보지 않기 구현 코드
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.
+                        editor.apply();
+                    }))
+                    .setIcon(R.drawable.ic_warning_24px).create();
+
+            mainAlertDialog.setOnShowListener(dialog -> {
+                mainAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorFew, null));
+                mainAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondary, null));
+            });
+            mainAlertDialog.show();
+        }
+
     }
 
     @Override
