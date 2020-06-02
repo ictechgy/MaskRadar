@@ -9,7 +9,11 @@
         android:id="@+id/navigation_map"
         android:name="com.jh.mask_radar.ui.map.MapFragment"
         android:label="@string/title_map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+        <action
+            android:id="@+id/action_navigation_map_to_navigation_notice"
+            app:destination="@id/navigation_notice" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_favorite"
@@ -34,5 +38,15 @@
         <action
             android:id="@+id/action_licenseFragment_to_navigation_about"
             app:destination="@id/navigation_about" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_notice"
+        android:name="com.jh.mask_radar.NoticeFragment"
+        android:label="@string/notice"
+        tools:layout="@layout/fragment_notice"
+        >
+        <action
+            android:id="@+id/action_navigation_notice_to_navigation_map"
+            app:destination="@id/navigation_map" />
     </fragment>
 </navigation>

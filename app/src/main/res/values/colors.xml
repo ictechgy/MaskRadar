@@ -15,4 +15,5 @@
     <color name="colorFew">#b71c1c</color>
     <color name="colorEmpty">#757575</color>
     <color name="colorNoSale">#000000</color>
+    <color name="black_overlay">#66000000</color>
 </resources>

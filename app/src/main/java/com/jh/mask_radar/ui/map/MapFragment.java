@@ -1,23 +1,17 @@
 package com.jh.mask_radar.ui.map;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -25,24 +19,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textview.MaterialTextView;
-import com.jh.mask_radar.MainActivity;
 import com.jh.mask_radar.R;
 import com.jh.mask_radar.db.AppDatabase;
 import com.jh.mask_radar.db.Pharm;
 import com.jh.mask_radar.model.Store;
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraAnimation;
-import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapView;
@@ -50,11 +43,11 @@ import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.Projection;
 import com.naver.maps.map.UiSettings;
-import com.naver.maps.map.overlay.InfoWindow;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
 import com.naver.maps.map.util.FusedLocationSource;
+import com.naver.maps.map.widget.LocationButtonView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,9 +55,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
+
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMap.OnCameraIdleListener, Overlay.OnClickListener, NaverMap.OnMapClickListener, MaterialButton.OnClickListener {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 777;
@@ -108,6 +99,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
     private MaterialButton addToFavoriteButton;
     private Marker oldMarker;
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,11 +107,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         //화면에 지도가 보이자마자 권한을 요청. 내 위치 버튼을 누른 경우에 인스턴스화 요청해도 될 것으로 보임.
         //현재 AlertDialog가 띄워져서 바로 보이지 않는 것으로 보임.
 
-        //사용자의 마지막 위치 가져오기
-        pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
-        if(pref!=null && pref.contains("latitude") && pref.contains("longitude")){
-            lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
-        }
 
         db = AppDatabase.getInstance(getContext());
     }
@@ -213,42 +200,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
                 .setIcon(R.drawable.ic_warning_24px).show();
 
          */
-        if(pref == null) pref = getContext().getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
-        int storedDayOfMonth = pref.getInt("day_of_week", 0);
-        boolean isDayChanged = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) != storedDayOfMonth;
-        //날짜는 Sunday를 1로 시작하여 Saturday를 7로 끝난다.
-        //최초 로딩시에는 defValue인 0을 반환하여 무조건 Alert가 뜬다.
 
-        if(isDayChanged){   //날짜가 바뀐 경우에 Alert 띄우기
-
-            AlertDialog mainAlertDialog = new MaterialAlertDialogBuilder(getContext())
-                    .setTitle(R.string.main_alert_title)
-                    //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
-                    .setAdapter(new ArrayAdapter<>(getContext(),
-                            android.R.layout.simple_list_item_1,
-                            Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
-                            (dialog, which) -> {})
-                    .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {
-                        if(storedDayOfMonth != 0) {
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.remove("day_of_week");
-                            editor.apply();
-                        }
-                    })
-                    .setNegativeButton(R.string.main_alert_cancel, ((dialog, which) -> {
-                        //하루동안 보지 않기 구현 코드
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.
-                        editor.apply();
-                    }))
-                    .setIcon(R.drawable.ic_warning_24px).create();
-
-            mainAlertDialog.setOnShowListener(dialog -> {
-                        mainAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorFew, null));
-                        mainAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondary, null));
-                    });
-            mainAlertDialog.show();
-        }
+        //AlertDialog -> onViewCreated()로
         //하루동안 보지 않기 코드에 대하여.
         //최초 로딩시에는 storedDayOfMonth 값이 0이 뜨므로 무조건 Alert는 띄워질 것이다. 이후 사용자가 오늘 하루 보지않기를 누르면 오늘 날짜를 저장한다.
         //이후에는 날짜가 바뀌었는지 확인하여 Alert를 띄운다.
@@ -312,6 +265,60 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, NaverMa
         mapView = view.findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+        //사용자의 마지막 위치 가져오기
+        Context context = view.getContext();
+        pref = context.getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE);
+        if(pref!=null){
+
+            if(pref.contains("latitude") && pref.contains("longitude"))
+                lastCoord = new LatLng(pref.getFloat("latitude", 0), pref.getFloat("longitude", 0));
+
+            boolean needNotice = pref.getBoolean("needNotice", true);   //기본값은 true로서 notice를 보여야 함을 의미
+            if(needNotice){
+                NavController navController = Navigation.findNavController(view);
+                navController.navigate(R.id.action_navigation_map_to_navigation_notice);
+
+                //need return?
+            }
+
+
+            int storedDayOfMonth = pref.getInt("day_of_week", 0);
+            boolean isDayChanged = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) != storedDayOfMonth;
+            //날짜는 Sunday를 1로 시작하여 Saturday를 7로 끝난다.
+            //최초 로딩시에는 defValue인 0을 반환하여 무조건 Alert가 뜬다.
+
+            if(isDayChanged){   //날짜가 바뀐 경우에 Alert 띄우기
+
+                AlertDialog mainAlertDialog = new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.main_alert_title)
+                        //보여줄 메시지가 많은 편이 아니므로 ListAdapter를 써보자.
+                        .setAdapter(new ArrayAdapter<>(context,
+                                        android.R.layout.simple_list_item_1,
+                                        Arrays.asList(getResources().getStringArray(R.array.main_alert_messages))),
+                                (dialog, which) -> {})
+                        .setPositiveButton(R.string.main_alert_button, (dialog, which) -> {
+                            if(storedDayOfMonth != 0) {
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.remove("day_of_week");
+                                editor.apply();
+                            }
+                        })
+                        .setNegativeButton(R.string.main_alert_cancel, ((dialog, which) -> {
+                            //하루동안 보지 않기 구현 코드
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putInt("day_of_week", Calendar.getInstance().get(Calendar.DAY_OF_WEEK)); //오늘의 요일을 저장한다.
+                            editor.apply();
+                        }))
+                        .setIcon(R.drawable.ic_warning_24px).create();
+
+                mainAlertDialog.setOnShowListener(dialog -> {
+                    mainAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorFew, null));
+                    mainAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.colorSecondary, null));
+                });
+                mainAlertDialog.show();
+            }
+        }
     }
 
     @Override
