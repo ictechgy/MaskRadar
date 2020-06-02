@@ -74,13 +74,13 @@ class NoticeFragment : Fragment() {
         // while interacting with the UI.
 
         confirmButton?.setOnClickListener {
-            show()
             val pref : SharedPreferences = view.context.getSharedPreferences(getString(R.string.preference_map_fragment), Context.MODE_PRIVATE)
             val edit = pref.edit()
             edit.putBoolean("needNotice", false)
             edit.apply()    //더이상 이 프래그먼트는 보지 않아도 됨
             val navController : NavController = Navigation.findNavController(view)
             navController.popBackStack()
+            (activity as? AppCompatActivity)?.supportActionBar?.show()
         }
         exitButton?.setOnClickListener {
             //앱 종료
