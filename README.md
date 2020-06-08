@@ -7,12 +7,10 @@
 > 공적마스크 검색 어플리케이션입니다.   
 > Only For Android - 안드로이드 전용입니다.
 
-     현재 지도부분만 구현된 상태입니다.   
-     다른 부분 구현하는대로 업데이트 예정
-     -> 네비게이션 위치를 변경하였으며 즐겨찾기 기능 추가중입니다. 
+     초기버전에서 네비게이션의 위치를 변경하였으며 즐겨찾기 기능을 추가하였습니다. 
      
   
-#### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>   
+#### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>    
 #### 개인정보 처리방침: <https://developerahn.blogspot.com/2020/03/blog-post.html>   
 #### 데이터는 '건강보험심사평가원-공적마스크 판매정보'를 통해 가져왔습니다.(공공데이터포털) <https://www.data.go.kr/dataset/15043025/openapi.do>
 &nbsp;
