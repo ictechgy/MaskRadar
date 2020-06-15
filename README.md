@@ -1,7 +1,8 @@
 # MaskRadar - 마스크 레이더   
 
-#### 현재 구글 플레이스토어 정책 강화로 인하여 어플리케이션 검색이 되지 않습니다. 한국 정보화 진흥원에 앱 등록을 문의한 후, 플레이스토어에 재 개시 될 수 있도록 하겠습니다. -> 현재 재 출시 대기중입니다. 
-#### 우선 ONE Store에 올려두었습니다. <https://onestore.co.kr/userpoc/apps/view?pid=0000748572>      
+#### 현재 구글 플레이스토어 정책 강화로 인하여 어플리케이션 검색이 되지 않습니다. 한국 정보화 진흥원에 앱 등록을 문의한 후, 플레이스토어에 재 개시 될 수 있도록 하겠습니다. -> 재출시 되었습니다!! 
+#### Google Play - <https://play.google.com/store/apps/details?id=com.jh.mask_radar>       
+#### ONE Store - <https://onestore.co.kr/userpoc/apps/view?pid=0000748572>         
      
                 
 > 공적마스크 검색 어플리케이션입니다.   
@@ -9,8 +10,7 @@
 
      초기버전에서 네비게이션의 위치를 변경하였으며 즐겨찾기 기능을 추가하였습니다. 
      
-  
-#### 어플리케이션 링크: <https://play.google.com/store/apps/details?id=com.jh.mask_radar>    
+     
 #### 개인정보 처리방침: <https://developerahn.blogspot.com/2020/03/blog-post.html>   
 #### 데이터는 '건강보험심사평가원-공적마스크 판매정보'를 통해 가져왔습니다.(공공데이터포털) <https://www.data.go.kr/dataset/15043025/openapi.do>
 &nbsp;
