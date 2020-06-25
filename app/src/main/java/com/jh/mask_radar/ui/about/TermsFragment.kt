@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.fragment_terms.*
 class TermsFragment : Fragment() {
     // TODO: Rename and change types of parameters
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

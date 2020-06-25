@@ -15,6 +15,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textview.MaterialTextView;
 import com.jh.mask_radar.R;
 
 public class AboutFragment extends Fragment {
@@ -38,6 +39,12 @@ public class AboutFragment extends Fragment {
         goToLicense.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             navController.navigate(R.id.action_navigation_about_to_licenseFragment);
+        });
+
+        MaterialTextView termsLink = root.findViewById(R.id.terms_link);
+        termsLink.setOnClickListener(v-> {
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+            navController.navigate(R.id.action_navigation_about_to_navigation_terms);
         });
 
         return root;
