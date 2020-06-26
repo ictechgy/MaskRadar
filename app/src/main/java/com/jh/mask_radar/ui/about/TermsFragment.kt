@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.jh.mask_radar.R
-import kotlinx.android.synthetic.main.fragment_terms.*
 
 class TermsFragment : Fragment() {
     // TODO: Rename and change types of parameters
@@ -18,8 +20,17 @@ class TermsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        terms_web_view.loadUrl(getString(R.string.terms_URL))
-        return inflater.inflate(R.layout.fragment_terms, container, false)
+        val v: View = inflater.inflate(R.layout.fragment_terms, container, false)
+        val termsWebView : WebView = v.findViewById(R.id.terms_web_view)
+        termsWebView.webChromeClient = WebChromeClient()
+        val webViewSettings = termsWebView.settings
+        webViewSettings.setSupportMultipleWindows(false)
+        webViewSettings.javaScriptCanOpenWindowsAutomatically = false
+        webViewSettings.javaScriptEnabled = false
+
+        termsWebView.loadUrl(getString(R.string.terms_URL))
+
+        return v
     }
 
     companion object {
@@ -36,7 +47,6 @@ class TermsFragment : Fragment() {
         fun newInstance() =
                 TermsFragment().apply {
                     arguments = Bundle().apply {
-
                     }
                 }
     }

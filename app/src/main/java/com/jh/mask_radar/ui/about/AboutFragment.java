@@ -20,12 +20,9 @@ import com.jh.mask_radar.R;
 
 public class AboutFragment extends Fragment {
 
-    private AboutViewModel aboutViewModel;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        aboutViewModel =
-                ViewModelProviders.of(this).get(AboutViewModel.class);
+        AboutViewModel aboutViewModel = ViewModelProviders.of(this).get(AboutViewModel.class);
         View root = inflater.inflate(R.layout.fragment_about, container, false);
         final TextView textView = root.findViewById(R.id.text_notifications);
         aboutViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -35,15 +32,15 @@ public class AboutFragment extends Fragment {
             }
         });
 
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+
         MaterialButton goToLicense = root.findViewById(R.id.button_go_to_license);
         goToLicense.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             navController.navigate(R.id.action_navigation_about_to_licenseFragment);
         });
 
         MaterialTextView termsLink = root.findViewById(R.id.terms_link);
         termsLink.setOnClickListener(v-> {
-            NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             navController.navigate(R.id.action_navigation_about_to_navigation_terms);
         });
 
