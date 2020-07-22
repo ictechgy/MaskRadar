@@ -89,3 +89,5 @@ strings.xml
 font.xml
 *.ttf
 *.otf
+
+.DS_Store
