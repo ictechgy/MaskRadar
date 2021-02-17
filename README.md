@@ -1,12 +1,61 @@
 # MaskRadar - 마스크 레이더   
 
-#### 현재 구글 플레이스토어 정책 강화로 인하여 어플리케이션 검색이 되지 않습니다. 한국 정보화 진흥원에 앱 등록을 문의한 후, 플레이스토어에 재 개시 될 수 있도록 하겠습니다. -> 재출시 되었습니다!! 
-#### Google Play - <https://play.google.com/store/apps/details?id=com.jh.mask_radar>       
-#### ONE Store - <https://onestore.co.kr/userpoc/apps/view?pid=0000748572>         
+**~~현재 구글 플레이스토어 정책 강화로 인하여 어플리케이션 검색이 되지 않습니다. 한국 정보화 진흥원에 앱 등록을 문의한 후, 플레이스토어에 재 개시 될 수 있도록 하겠습니다. -> 재출시 되었습니다!!~~**   
+### [건강보험심사평가원에서의 오픈 API 제공 중단](https://www.data.go.kr/bbs/ntc/selectNotice.do?originId=NOTICE_0000000001728)에 따라 본 어플리케이션은 더이상 운용되지 않습니다.   
+
+**Google Play - <https://play.google.com/store/apps/details?id=com.jh.mask_radar>**       
+**ONE Store - <https://onestore.co.kr/userpoc/apps/view?pid=0000748572>**         
      
                 
 > 공적마스크 검색 어플리케이션입니다.   
-> Only For Android - 안드로이드 전용입니다.
+> Only For Android - 안드로이드 전용입니다.   
+   
+&nbsp;   
+## 🤔 본 어플리케이션을 만들게된 계기 (What made me create this application?)
+2020년도 초, 코로나19의 확산에 따라 마스크 수급불안이 발생하였고 이에 정부는 2020년 3월 5일 **'마스크 수급 안정화 대책'** 을 발표하였습니다. (출생연도 끝자리에 따라 마스크를 구입할 수 있는 요일을 지정)   
+다만, 각 약국마다 배분할 수 있는 마스크의 수에 제한이 있었다보니 약국별로 재고가 얼마나 남아있는지 알 수 있도록 관련 API도 제공하기 시작하였습니다. (3월 11일) - [참고 링크](https://terms.naver.com/entry.nhn?docId=5926931&cid=43667&categoryId=43667)   
+저 또한 사람들이 편리하게 마스크를 살 수 있도록 돕기 위해 어플리케이션 개발에 착수하였습니다.   
+   
+&nbsp;   
+
+## 💻 개발 기간 (Development Period)
+최초버전인 Ver 1.0을 제작하는데에 소요된 시간 - 약 1주일   
+이후 UI 변경 및 불편사항들을 반영하여 업데이트 진행.   
+개발은 혼자 진행하였으며 아이콘 및 디자인 부분에서는 박유진 학생(yujinp@gmail.com)의 도움을 받아 진행하였습니다.   
+**개발에 사용된 언어: Java, Kotlin(일부)**   
+&nbsp;   
+*사실 심사받는 과정이 길어져 출시에는 몇주 더 소요되었었다.(코로나로 인한 재택근무 등의 영향)*   
+**출시된 이후에도 '코로나 관련 어플리케이션 정책'변경으로 인해 한차례 구글 플레이에서 삭제되었었다가 '한국지능정보사회진흥원(구 한국정보화진흥원) PasS-TA' 문의를 통해 해결하였었다.**   
+   
+&nbsp;   
+
+## 📚 사용한 라이브러리 (Used libraries)
+
+   
+&nbsp;   
+
+## 🚀 사용했거나 사용하려 했던 패턴/스킬 (Used Or Tried Patterns And Skills)
+
+   
+&nbsp;   
+
+## 💦 만들면서 힘들었던 점 (Difficulties)
+
+   
+&nbsp;   
+
+## 💬 기능(사용법) 
+
+   
+&nbsp;   
+
+## 🛠 개선해야할 점/추가했으면 하는 기능 (Needs to be improved / Want to add)
+
+   
+&nbsp;   
+
+## 📝 Information
+   
 
      초기버전에서 네비게이션의 위치를 변경하였으며 즐겨찾기 기능을 추가하였습니다. 
      
