@@ -25,12 +25,18 @@
 **개발에 사용된 언어: Java, Kotlin(일부)**   
 &nbsp;   
 *사실 심사받는 과정이 길어져 출시에는 몇주 더 소요되었었다.(코로나로 인한 재택근무 등의 영향)*   
-**출시된 이후에도 '코로나 관련 어플리케이션 정책'변경으로 인해 한차례 구글 플레이에서 삭제되었었다가 '한국지능정보사회진흥원(구 한국정보화진흥원) PasS-TA' 문의를 통해 해결하였었다.**   
+**출시된 이후에도 '코로나 관련 어플리케이션 정책'변경으로 인해 한차례 구글 플레이에서 삭제되었었다가 ['한국지능정보사회진흥원(구 한국정보화진흥원) PasS-TA'](https://mask.paas-ta.org/) 문의를 통해 해결하였었다.**   
    
 &nbsp;   
 
 ## 📚 사용한 라이브러리 (Used libraries)
-
+1. [네이버 지도](https://www.ncloud.com/product/applicationService/maps)
+2. [Google Material Design](https://material.io/design)
+3. [Volley](https://developer.android.com/training/volley?hl=ko)
+4. play-services-location
+5. [Room](https://developer.android.com/training/data-storage/room?hl=ko)
+6. [swipe refresh layout](https://developer.android.com/training/swipe/add-swipe-interface?hl=ko) 
+7. 기타 legacy support나 kotlin 지원 라이브러리 등
    
 &nbsp;   
 
