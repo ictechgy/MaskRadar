@@ -28,6 +28,8 @@
 **출시된 이후에도 '코로나 관련 어플리케이션 정책'변경으로 인해 한차례 구글 플레이에서 삭제되었었다가 ['한국지능정보사회진흥원(구 한국정보화진흥원) PasS-TA'](https://mask.paas-ta.org/) 문의를 통해 해결하였었다.**   
    
 &nbsp;   
+**Kotlin은 [Code with Joyce](https://www.youtube.com/user/soja0524) 및 [테크과학! DiMo](https://www.youtube.com/c/CHDiMo) 유튜브, 구글검색 등을 이용하여 학습하였음.**   
+&nbsp;   
 
 ## 📚 사용한 라이브러리 (Used libraries)
 1. [네이버 지도](https://www.ncloud.com/product/applicationService/maps)
@@ -41,15 +43,25 @@
 &nbsp;   
 
 ## 🚀 사용했거나 사용하려 했던 패턴/스킬 (Used Or Tried Patterns And Skills)
-1. MVVM (Model - View - ViewModel)   
-제대로 사용했다고 볼 수는 없다. 새로운 액티비티 등을 만들었을 때 자동으로 작성되어있는 것이 궁금하여 검색하고 사용을 시도해보았으나.. 굉장히 미숙하게 사용했다. 
+1. MVVM Architecture (Model - View - ViewModel)   
+제대로 사용했다고 볼 수는 없다. 새로운 Activity/Fragment 등을 만들 때 자동으로 만들 수 있다는 점이 궁금하여 구글 검색 후 사용을 시도해보았지만.. 굉장히 미숙하게 사용했다. (Model, View, ViewModel의 분리를 전혀 하지 못했다.) 
 2. Factory Pattern (객체 생성의 시점을 바로 결정하지 않고 서브클래스로 미룸)   
-이 패턴 또한 올바르게 사용했다고 생각이 들지는 않는다. 
+이 패턴 또한 올바르게 사용했다고 생각이 들지는 않는다.(ViewModel 생성 시 ViewModelProvider 이용)
+3. Observer Pattern   
+Fragment에서 ViewModel의 멤버 인스턴스를 Observe하는 데 사용. 
+4. Binding (양방향 바인딩)   
+자체적으로 제공하는 양방향 data binding을 사용해보았다. 
+5. Singletone Pattern
+6. Local에 데이터를 저장하기 위해 Room Library 이용
+7. 비동기를 위한 멀티쓰레딩 구현 시 Excutors ThreadPool 이용
+
    
 &nbsp;   
 
 ## 💦 만들면서 힘들었던 점 (Difficulties)
-
+1. 스파게티 코드(spaghetti code)로 작성한 탓에 나조차도 유지 보수를 하기가 어려웠다. 
+2. NullPointerException   
+자바로 개발을 했는데 런타임 중간중간 의도치 않은 예외가 발생했었다. 이를 디버깅하는 것은 상당히 까다로웠다. (Null Safety가 얼마나 좋은 것인지 알 수 있었다.) 
    
 &nbsp;   
 
@@ -59,7 +71,8 @@
 &nbsp;   
 
 ## 🛠 개선해야할 점/추가했으면 하는 기능 (Needs to be improved / Want to add)
-
+1. Activity/Fragment의 LifeCycle에 맞춰 각종 뷰 바인딩이나 메소드 호출 등의 위치 변경 필요 (아무대나 막 호출하고 선언하고 그랬는데 그러면 안된다.)
+2. 스파게티 코드(spaghetti code) 개선 필요
    
 &nbsp;   
 
@@ -84,7 +97,7 @@
 3. ic_post_offece, ic_marker_post_office, ic_unselected_post_office 아이콘에 사용된 우체국 마크는 우정사업본부의 우정 제비 CI를 사용하였습니다. [우정 제비 CI](http://www.koreapost.go.kr/, "우정사업본부 CI")
 4. ic_marker_pharm, ic_unselected_pharm, ic_pill, ic_pill_color 아이콘, 어플리케이션 로고 및 그래픽 이미지의 저작권은 박유진 학생(yujinp@gmail.com) 및 안진홍(ictechgy@gmail.com)에 있습니다. 
 * * *   
-#### Ver.1.0.0 이미지   
+## Ver.1.0.0 이미지   
 <img width="370" alt="mask_radar_1" src="https://user-images.githubusercontent.com/39452092/84392512-74bcdd00-ac35-11ea-986c-663da05153cf.png">   
 <img width="370" alt="mask_radar_2" src="https://user-images.githubusercontent.com/39452092/84392537-7ab2be00-ac35-11ea-930e-a87162e120ed.png">   
 <img width="370" alt="mask_radar_3" src="https://user-images.githubusercontent.com/39452092/84392546-7dadae80-ac35-11ea-97d8-4f6169ef919a.png">   
@@ -95,7 +108,7 @@
 
    
       
-#### 아래 이미지는 Ver. 1.0.0 이전 이미지   
+## 아래 이미지는 Ver. 1.0.0 이전 이미지   
 <img width="200" alt="mask_radar_screenshot1" src="https://user-images.githubusercontent.com/39452092/79042879-4a02d800-7c36-11ea-9f58-b67c30b226f4.png">
 <img width="200" alt="mask_radar_screenshot2" src="https://user-images.githubusercontent.com/39452092/79042880-4e2ef580-7c36-11ea-8a85-2bd36b73a748.png">
 <img width="200" alt="mask_radar_screenshot3" src="https://user-images.githubusercontent.com/39452092/79042881-4f602280-7c36-11ea-8786-fa543814142d.png">
